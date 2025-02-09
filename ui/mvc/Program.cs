@@ -1,4 +1,14 @@
+using Infrastructure.dbcontext;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<DirectoryContext>(
+    options => options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DaHub")
+        )
+    );
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
