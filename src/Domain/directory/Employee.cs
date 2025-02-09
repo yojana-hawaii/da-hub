@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Domain.extension;
 
 namespace Domain.directory;
 
-public class Employee
+public class Employee : AuditableEntity
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
@@ -46,17 +47,17 @@ public class Employee
 
 
     //Foreign key
-    public int JobTitleId { get; set; }
+    public int? JobTitleId { get; set; }
     public JobTitle? JobTitle { get; set; }
 
-    public int DepartmentId { get; set; }
+    public int? DepartmentId { get; set; }
     public Department? Department { get; set; }
 
-    public int LocationId { get; set; }
+    public int? LocationId { get; set; }
     public Location? Location { get; set; }
 
     //Self-Referencing foreign key
-    public int PrimaryManagerId { get; set; }
+    public int? PrimaryManagerId { get; set; }
     public Employee? PrimaryManager { get; set; }
 
 
