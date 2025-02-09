@@ -12,5 +12,18 @@ internal class FaxConfiguration : IEntityTypeConfiguration<Fax>
             .HasIndex(f => f.FaxNumber)
             .IsUnique()
             .HasDatabaseName("ix_fax_number");
+        builder
+            .HasOne(f => f.Location)
+            .WithMany(f => f.Faxes)
+            .HasForeignKey(f => f.LocationId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
+        builder
+            .HasOne(f => f.Department)
+            .WithMany(f => f.Faxes)
+            .HasForeignKey(f => f.DepartmentId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
+
     }
 }
