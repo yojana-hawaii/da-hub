@@ -1,7 +1,7 @@
-﻿@model IEnumerable<Domain.directory.Location>
+﻿@model IEnumerable<Domain.directory.JobTitle>
 
 @{
-    ViewData["Title"] = "Location";
+    ViewData["Title"] = "Job Title";
 }
 
 <h1>Index</h1>
@@ -13,10 +13,10 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.LocationName)
+                @Html.DisplayNameFor(model => model.JobTitleName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.SubLocation)
+                @Html.DisplayNameFor(model => model.JobTitleDescription)
             </th>
             <th></th>
         </tr>
@@ -25,10 +25,10 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.LocationName)
+                @Html.DisplayFor(modelItem => item.JobTitleName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.SubLocation)
+                @Html.DisplayFor(modelItem => item.JobTitleDescription)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

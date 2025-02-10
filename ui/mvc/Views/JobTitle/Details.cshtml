@@ -1,26 +1,26 @@
-﻿@model Domain.directory.Location
+﻿@model Domain.directory.JobTitle
 
 @{
-    ViewData["Title"] = "Location Details";
+    ViewData["Title"] = "Job Title Details";
 }
 
 <h1>Details</h1>
 
 <div>
-    <h4>Location</h4>
+    <h4>JobTitle</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LocationName)
+            @Html.DisplayNameFor(model => model.JobTitleName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LocationName)
+            @Html.DisplayFor(model => model.JobTitleName)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SubLocation)
+            @Html.DisplayNameFor(model => model.JobTitleDescription)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SubLocation)
+            @Html.DisplayFor(model => model.JobTitleDescription)
         </dd>
     </dl>
 </div>

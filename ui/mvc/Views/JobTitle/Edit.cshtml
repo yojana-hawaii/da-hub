@@ -1,12 +1,12 @@
-﻿@model Domain.directory.Location
+﻿@model Domain.directory.JobTitle
 
 @{
-    ViewData["Title"] = "Location Edit";
+    ViewData["Title"] = "Job Title Edit";
 }
 
 <h1>Edit</h1>
 
-<h4>Location</h4>
+<h4>JobTitle</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -14,14 +14,14 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
-                <label asp-for="LocationName" class="control-label"></label>
-                <input asp-for="LocationName" class="form-control" />
-                <span asp-validation-for="LocationName" class="text-danger"></span>
+                <label asp-for="JobTitleName" class="control-label"></label>
+                <input asp-for="JobTitleName" class="form-control" />
+                <span asp-validation-for="JobTitleName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="SubLocation" class="control-label"></label>
-                <input asp-for="SubLocation" class="form-control" />
-                <span asp-validation-for="SubLocation" class="text-danger"></span>
+                <label asp-for="JobTitleDescription" class="control-label"></label>
+                <input asp-for="JobTitleDescription" class="form-control" />
+                <span asp-validation-for="JobTitleDescription" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

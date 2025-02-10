@@ -20,3 +20,9 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+
+/*Yojana custom*/
+.form-group {
+    margin-bottom: 1rem;
+}

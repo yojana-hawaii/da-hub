@@ -1,26 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Domain.directory;
 using Infrastructure.dbcontext;
 
 namespace mvc.Controllers
 {
-    public class LocationController : Controller
+    public class FaxController : Controller
     {
         private readonly DirectoryContext _context;
 
-        public LocationController(DirectoryContext context)
+        public FaxController(DirectoryContext context)
         {
             _context = context;
         }
 
-        // GET: Location
+        // GET: Fax
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Locations.ToListAsync());
+            var directoryContext = _context.Faxes.Include(f => f.Department).Include(f => f.Location);
+            return View(await directoryContext.ToListAsync());
         }
 
-        // GET: Location/Details/5
+        // GET: Fax/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -28,44 +34,45 @@ namespace mvc.Controllers
                 return NotFound();
             }
 
-            var location = await _context.Locations
+            var fax = await _context.Faxes
+                .Include(f => f.Department)
+                .Include(f => f.Location)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (location == null)
+            if (fax == null)
             {
                 return NotFound();
             }
 
-            return View(location);
+            return View(fax);
         }
 
-
-
-        // GET: Location/Create
+        // GET: Fax/Create
         public IActionResult Create()
         {
+            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName");
+            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "LocationName");
             return View();
         }
 
-        // POST: Location/Create
+        // POST: Fax/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,LocationName,SubLocation")] Location location)
+        public async Task<IActionResult> Create([Bind("Id,FaxName,FaxNumber,FaxForward,ForwardTo,LocationId,DepartmentId")] Fax fax)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(location);
+                _context.Add(fax);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(location);
+            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", fax.DepartmentId);
+            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "LocationName", fax.LocationId);
+            return View(fax);
         }
 
-
-
-
-        // GET: Location/Edit/5
+        // GET: Fax/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -73,22 +80,24 @@ namespace mvc.Controllers
                 return NotFound();
             }
 
-            var location = await _context.Locations.FindAsync(id);
-            if (location == null)
+            var fax = await _context.Faxes.FindAsync(id);
+            if (fax == null)
             {
                 return NotFound();
             }
-            return View(location);
+            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", fax.DepartmentId);
+            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "LocationName", fax.LocationId);
+            return View(fax);
         }
 
-        // POST: Location/Edit/5
+        // POST: Fax/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,LocationName,SubLocation")] Location location)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FaxName,FaxNumber,FaxForward,ForwardTo,LocationId,DepartmentId")] Fax fax)
         {
-            if (id != location.Id)
+            if (id != fax.Id)
             {
                 return NotFound();
             }
@@ -97,12 +106,12 @@ namespace mvc.Controllers
             {
                 try
                 {
-                    _context.Update(location);
+                    _context.Update(fax);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!LocationExists(location.Id))
+                    if (!FaxExists(fax.Id))
                     {
                         return NotFound();
                     }
@@ -113,13 +122,12 @@ namespace mvc.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(location);
+            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", fax.DepartmentId);
+            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "LocationName", fax.LocationId);
+            return View(fax);
         }
 
-
-
-
-        // GET: Location/Delete/5
+        // GET: Fax/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -127,37 +135,36 @@ namespace mvc.Controllers
                 return NotFound();
             }
 
-            var location = await _context.Locations
+            var fax = await _context.Faxes
+                .Include(f => f.Department)
+                .Include(f => f.Location)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (location == null)
+            if (fax == null)
             {
                 return NotFound();
             }
 
-            return View(location);
+            return View(fax);
         }
 
-        // POST: Location/Delete/5
+        // POST: Fax/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var location = await _context.Locations.FindAsync(id);
-            if (location != null)
+            var fax = await _context.Faxes.FindAsync(id);
+            if (fax != null)
             {
-                _context.Locations.Remove(location);
+                _context.Faxes.Remove(fax);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-
-
-
-        private bool LocationExists(int id)
+        private bool FaxExists(int id)
         {
-            return _context.Locations.Any(e => e.Id == id);
+            return _context.Faxes.Any(e => e.Id == id);
         }
     }
 }
