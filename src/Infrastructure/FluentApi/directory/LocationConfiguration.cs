@@ -9,7 +9,7 @@ internal class LocationConfiguration : IEntityTypeConfiguration<Location>
     public void Configure(EntityTypeBuilder<Location> builder)
     {
         builder
-            .HasIndex(i => i.LocationName)
+            .HasIndex(i => new { i.LocationName, i.SubLocation})
             .IsUnique()
             .HasDatabaseName("ix_location_name");
         builder
