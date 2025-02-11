@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DirectoryContext))]
-    [Migration("20250209053614_FaxForeignKey")]
-    partial class FaxForeignKey
+    [Migration("20250211013912_DirectoryEntity")]
+    partial class DirectoryEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
