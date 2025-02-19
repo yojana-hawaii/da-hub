@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Domain.directory;
@@ -59,7 +55,7 @@ namespace mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FaxName,FaxNumber,FaxForward,ForwardTo,LocationId,DepartmentId")] Fax fax)
+        public async Task<IActionResult> Create([Bind("Id,FaxName,FaxNumber,IsForwarded,ForwardTo,LocationId,DepartmentId")] Fax fax)
         {
             if (ModelState.IsValid)
             {
@@ -95,7 +91,7 @@ namespace mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FaxName,FaxNumber,FaxForward,ForwardTo,LocationId,DepartmentId")] Fax fax)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FaxName,FaxNumber,IsForwarded,ForwardTo,LocationId,DepartmentId")] Fax fax)
         {
             if (id != fax.Id)
             {
