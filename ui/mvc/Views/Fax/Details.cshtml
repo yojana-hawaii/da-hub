@@ -23,10 +23,10 @@
             @Html.DisplayFor(model => model.FaxNumber)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FaxForward)
+            @Html.DisplayNameFor(model => model.IsForwarded)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FaxForward)
+            @Html.DisplayFor(model => model.IsForwarded)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.ForwardTo)
@@ -38,7 +38,7 @@
             @Html.DisplayNameFor(model => model.Location)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Location.LocationName)
+            @Html.DisplayFor(model => model.Location.Summary)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Department)

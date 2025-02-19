@@ -46,7 +46,7 @@ namespace mvc.Controllers
         public IActionResult Create()
         {
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName");
-            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "LocationName");
+            LocationDropdownList();
             return View();
         }
 
@@ -64,7 +64,7 @@ namespace mvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", fax.DepartmentId);
-            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "LocationName", fax.LocationId);
+            LocationDropdownList(fax);
             return View(fax);
         }
 
@@ -82,7 +82,7 @@ namespace mvc.Controllers
                 return NotFound();
             }
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", fax.DepartmentId);
-            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "LocationName", fax.LocationId);
+            LocationDropdownList(fax);
             return View(fax);
         }
 
@@ -119,7 +119,7 @@ namespace mvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", fax.DepartmentId);
-            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "LocationName", fax.LocationId);
+            LocationDropdownList(fax);
             return View(fax);
         }
 
@@ -162,5 +162,16 @@ namespace mvc.Controllers
         {
             return _context.Faxes.Any(e => e.Id == id);
         }
+
+        private void LocationDropdownList(Fax? fax = null)
+        {
+            var query = from d in _context.Locations
+                        orderby d.LocationName, d.SubLocation
+                        select d;
+            //ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "LocationName", fax.LocationId);
+
+            ViewData["LocationId"] = new SelectList(query, "Id", "Summary", fax?.LocationId);
+        }
+
     }
 }

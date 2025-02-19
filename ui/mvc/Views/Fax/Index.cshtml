@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Domain.directory.Fax>
 
 @{
-    ViewData["Title"] = "Fax ";
+    ViewData["Title"] = "Faxes";
 }
 
 <h1>Index</h1>
@@ -19,7 +19,7 @@
                 @Html.DisplayNameFor(model => model.FaxNumber)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.FaxForward)
+                @Html.DisplayNameFor(model => model.IsForwarded)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.ForwardTo)
@@ -43,13 +43,13 @@
                 @Html.DisplayFor(modelItem => item.FaxNumber)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.FaxForward)
+                @Html.DisplayFor(modelItem => item.IsForwarded)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.ForwardTo)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Location.LocationName)
+                @Html.DisplayFor(modelItem => item.Location.Summary)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Department.DepartmentName)
