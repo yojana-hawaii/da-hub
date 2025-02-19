@@ -11,9 +11,11 @@ public class JobTitle : AuditableEntity
 
 
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
+    [Display(Name = "Job Title")]
     public required string JobTitleName { get; set; }
 
     [StringLength(500, ErrorMessage = "{0} cannot exceed {1} characters")]
+    [Display(Name = "Job Description")]
     public string? JobTitleDescription { get; set; }
 
 

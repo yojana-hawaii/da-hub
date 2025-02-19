@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Domain.extension;
 using System.ComponentModel.DataAnnotations;
-using Domain.extension;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.directory;
 
@@ -11,6 +11,7 @@ public class Department : AuditableEntity
 
 
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
+    [Display(Name = "Department Name")]
     public required string DepartmentName { get; set; }
 
 

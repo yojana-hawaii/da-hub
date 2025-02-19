@@ -18,19 +18,25 @@ public class Fax : AuditableEntity
 
 
     [Required(ErrorMessage = "Fax number is required.")]
-    [DataType(DataType.PhoneNumber)]
+    [Display(Name = "Fax Number")]
+    [Phone]
     public required string FaxNumber { get; set; }
 
 
-    public bool FaxForward { get; set; }
-    public int? ForwardTo { get; set; }
+
+    [Display(Name = "Is Fax Forwarded")]
+    public bool IsForwarded { get; set; }
+
+    [Display(Name = "Forwarded To")]
+    [DataType(DataType.PhoneNumber)]
+    public string? ForwardTo { get; set; }
 
 
 
 
-    public int LocationId { get; set; }
+    public int? LocationId { get; set; }
     public Location? Location { get; set; }
 
-    public int DepartmentId { get; set; }
+    public int? DepartmentId { get; set; }
     public Department? Department { get; set; }
 }
