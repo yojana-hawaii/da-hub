@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DirectoryContext))]
-    [Migration("20250211013912_DirectoryEntity")]
-    partial class DirectoryEntity
+    [Migration("20250211042101_faxproperties")]
+    partial class faxproperties
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -179,11 +179,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DepartmentId")
+                    b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("FaxForward")
-                        .HasColumnType("bit");
 
                     b.Property<string>("FaxName")
                         .IsRequired()
@@ -192,12 +189,17 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("FaxNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
 
-                    b.Property<int?>("ForwardTo")
-                        .HasColumnType("int");
+                    b.Property<string>("ForwardTo")
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
 
-                    b.Property<int>("LocationId")
+                    b.Property<bool>("IsForwarded")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("LocationId")
                         .HasColumnType("int");
 
                     b.Property<string>("ModifiedBy")
@@ -293,12 +295,13 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LocationName")
-                        .IsUnique()
-                        .HasDatabaseName("ix_location_name");
-
                     b.HasIndex("SubLocation")
                         .HasDatabaseName("ix_location_sublocation");
+
+                    b.HasIndex("LocationName", "SubLocation")
+                        .IsUnique()
+                        .HasDatabaseName("ix_location_name")
+                        .HasFilter("[SubLocation] IS NOT NULL");
 
                     b.ToTable("Locations");
                 });

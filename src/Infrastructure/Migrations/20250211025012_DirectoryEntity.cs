@@ -130,10 +130,10 @@ namespace Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FaxName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     FaxNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FaxForward = table.Column<bool>(type: "bit", nullable: false),
-                    ForwardTo = table.Column<int>(type: "int", nullable: true),
-                    LocationId = table.Column<int>(type: "int", nullable: false),
-                    DepartmentId = table.Column<int>(type: "int", nullable: false),
+                    IsForwarded = table.Column<bool>(type: "bit", nullable: false),
+                    ForwardTo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LocationId = table.Column<int>(type: "int", nullable: true),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     ModifiedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -212,8 +212,9 @@ namespace Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_location_name",
                 table: "Locations",
-                column: "LocationName",
-                unique: true);
+                columns: new[] { "LocationName", "SubLocation" },
+                unique: true,
+                filter: "[SubLocation] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "ix_location_sublocation",

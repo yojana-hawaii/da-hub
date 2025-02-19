@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DirectoryContext))]
-    [Migration("20250211014633_locationUpdate")]
-    partial class locationUpdate
+    [Migration("20250211025012_DirectoryEntity")]
+    partial class DirectoryEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -179,11 +179,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DepartmentId")
+                    b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("FaxForward")
-                        .HasColumnType("bit");
 
                     b.Property<string>("FaxName")
                         .IsRequired()
@@ -194,10 +191,13 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("ForwardTo")
-                        .HasColumnType("int");
+                    b.Property<string>("ForwardTo")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LocationId")
+                    b.Property<bool>("IsForwarded")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("LocationId")
                         .HasColumnType("int");
 
                     b.Property<string>("ModifiedBy")
