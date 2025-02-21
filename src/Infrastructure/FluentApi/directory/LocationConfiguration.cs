@@ -9,11 +9,12 @@ internal class LocationConfiguration : IEntityTypeConfiguration<Location>
     public void Configure(EntityTypeBuilder<Location> builder)
     {
         builder
-            .HasIndex(i => new { i.LocationName, i.SubLocation})
-            .IsUnique()
-            .HasDatabaseName("ix_location_name");
+           .Property(c => c.ComputedSubLocationForUniqueness)
+           .HasComputedColumnSql("isnull(SubLocation, 'NULL-MARKER')");
         builder
-            .HasIndex(i => i.SubLocation)
-            .HasDatabaseName("ix_location_sublocation");
+            .HasIndex(i => new { i.LocationName, i.ComputedSubLocationForUniqueness})
+            .IsUnique()
+            .HasDatabaseName("ix_location");
+      
     }
 }

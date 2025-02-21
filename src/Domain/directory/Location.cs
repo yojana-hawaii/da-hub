@@ -29,6 +29,8 @@ public class Location : AuditableEntity
     [Display(Name = "Sub Location (example: Floor)")]
     public string? SubLocation { get; set; }
 
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public string ComputedSubLocationForUniqueness { get; set; } = "";
 
 
     public IEnumerable<Employee> Employees { get; set; } = new HashSet<Employee>();
