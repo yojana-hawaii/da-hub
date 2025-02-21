@@ -5,7 +5,7 @@ using Domain.extension;
 
 namespace Domain.directory;
 
-public class Fax : AuditableEntity
+public class Fax : AuditableEntity, IValidatableObject
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
@@ -39,4 +39,22 @@ public class Fax : AuditableEntity
 
     public int? DepartmentId { get; set; }
     public Department? Department { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if(IsForwarded)
+        {
+            if(ForwardTo == null)
+            {
+                yield return new ValidationResult("Need forward number if fax has been forwarded");
+            }
+        }
+        else
+        {
+            if(ForwardTo != null)
+            {
+                yield return new ValidationResult("Remove forward number if the fax is not forwaded");
+            }
+        }
+    }
 }
