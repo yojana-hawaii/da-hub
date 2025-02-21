@@ -3,55 +3,58 @@ using Microsoft.EntityFrameworkCore;
 using Domain.directory;
 using Infrastructure.dbcontext;
 
-namespace mvc.Controllers
+namespace mvc.Controllers;
+
+public class LocationController : Controller
 {
-    public class LocationController : Controller
+    private readonly DirectoryContext _context;
+
+    public LocationController(DirectoryContext context)
     {
-        private readonly DirectoryContext _context;
+        _context = context;
+    }
 
-        public LocationController(DirectoryContext context)
+    // GET: Location
+    public async Task<IActionResult> Index()
+    {
+        return View(await _context.Locations.AsNoTracking().ToListAsync());
+    }
+
+    // GET: Location/Details/5
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id == null)
         {
-            _context = context;
+            return NotFound();
         }
 
-        // GET: Location
-        public async Task<IActionResult> Index()
+        var location = await _context.Locations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.Id == id);
+        if (location == null)
         {
-            return View(await _context.Locations.ToListAsync());
+            return NotFound();
         }
 
-        // GET: Location/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var location = await _context.Locations
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (location == null)
-            {
-                return NotFound();
-            }
-
-            return View(location);
-        }
+        return View(location);
+    }
 
 
 
-        // GET: Location/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+    // GET: Location/Create
+    public IActionResult Create()
+    {
+        return View();
+    }
 
-        // POST: Location/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,LocationName,SubLocation")] Location location)
+    // POST: Location/Create
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("LocationName,SubLocation")] Location location)
+    {
+        try
         {
             if (ModelState.IsValid)
             {
@@ -59,105 +62,121 @@ namespace mvc.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(location);
+        }
+        catch (DbUpdateException dex)
+        {
+            if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Locations' with unique index"))
+            {
+                ModelState.AddModelError("LocationName", "Unable to save duplicate location / sub-location pair.");
+            }
+            else
+            {
+                ModelState.AddModelError("", "Unable to save. Some problem I did not thing about.");
+            }
+        }
+        catch(Exception ex)
+        {
+            throw;
+        }
+        return View(location);
+    }
+
+
+
+
+    // GET: Location/Edit/5
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
         }
 
-
-
-
-        // GET: Location/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        var location = await _context.Locations.FindAsync(id);
+        if (location == null)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            return NotFound();
+        }
+        return View(location);
+    }
 
-            var location = await _context.Locations.FindAsync(id);
-            if (location == null)
-            {
-                return NotFound();
-            }
-            return View(location);
+    // POST: Location/Edit/5
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, [Bind("LocationName,SubLocation")] Location location)
+    {
+        if (id != location.Id)
+        {
+            return NotFound();
         }
 
-        // POST: Location/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,LocationName,SubLocation")] Location location)
+        if (ModelState.IsValid)
         {
-            if (id != location.Id)
+            try
             {
-                return NotFound();
+                _context.Update(location);
+                await _context.SaveChangesAsync();
             }
-
-            if (ModelState.IsValid)
+            catch (DbUpdateConcurrencyException)
             {
-                try
+                if (!LocationExists(location.Id))
                 {
-                    _context.Update(location);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!LocationExists(location.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(location);
-        }
-
-
-
-
-        // GET: Location/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var location = await _context.Locations
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (location == null)
-            {
-                return NotFound();
-            }
-
-            return View(location);
-        }
-
-        // POST: Location/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var location = await _context.Locations.FindAsync(id);
-            if (location != null)
-            {
-                _context.Locations.Remove(location);
-            }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+        return View(location);
+    }
 
 
 
 
-        private bool LocationExists(int id)
+    // GET: Location/Delete/5
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null)
         {
-            return _context.Locations.Any(e => e.Id == id);
+            return NotFound();
         }
+
+        var location = await _context.Locations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.Id == id);
+        if (location == null)
+        {
+            return NotFound();
+        }
+
+        return View(location);
+    }
+
+    // POST: Location/Delete/5
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var location = await _context.Locations.FindAsync(id);
+        if (location != null)
+        {
+            _context.Locations.Remove(location);
+        }
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+
+
+
+    private bool LocationExists(int id)
+    {
+        return _context.Locations.Any(e => e.Id == id);
     }
 }

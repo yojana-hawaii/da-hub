@@ -1,5 +1,5 @@
 
 
-Add-Migration DirectoryEntity -StartupProject ui\mvc -Project src\Infrastructure -Context DirectoryContext
-Update-Database -StartupProject ui\mvc
+Add-Migration DirectoryEntity -StartupProject ui\mvc -Project src\Infrastructure -Context DirectoryContext -OutputDir DirectoryMigration
+Update-Database -StartupProject ui\mvc -Context DirectoryContext -Project src\Infrastructure
 Remove-Migration -StartupProject ui\mvc -Project src\Infrastructure -Context DirectoryContext
