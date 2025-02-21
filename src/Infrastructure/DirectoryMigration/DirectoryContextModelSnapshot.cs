@@ -4,19 +4,16 @@ using Infrastructure.dbcontext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.DirectoryMigration
 {
     [DbContext(typeof(DirectoryContext))]
-    [Migration("20250211025012_DirectoryEntity")]
-    partial class DirectoryEntity
+    partial class DirectoryContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -268,6 +265,12 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ComputedSubLocationForUniqueness")
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("nvarchar(450)")
+                        .HasComputedColumnSql("isnull(SubLocation, 'NULL-MARKER')");
+
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -293,13 +296,9 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SubLocation")
-                        .HasDatabaseName("ix_location_sublocation");
-
-                    b.HasIndex("LocationName", "SubLocation")
+                    b.HasIndex("LocationName", "ComputedSubLocationForUniqueness")
                         .IsUnique()
-                        .HasDatabaseName("ix_location_name")
-                        .HasFilter("[SubLocation] IS NOT NULL");
+                        .HasDatabaseName("ix_location");
 
                     b.ToTable("Locations");
                 });

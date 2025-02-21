@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.DirectoryMigration
 {
     /// <inheritdoc />
     public partial class DirectoryEntity : Migration
@@ -54,6 +54,7 @@ namespace Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     LocationName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     SubLocation = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ComputedSubLocationForUniqueness = table.Column<string>(type: "nvarchar(450)", nullable: false, computedColumnSql: "isnull(SubLocation, 'NULL-MARKER')"),
                     CreatedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     ModifiedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -210,16 +211,10 @@ namespace Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_location_name",
+                name: "ix_location",
                 table: "Locations",
-                columns: new[] { "LocationName", "SubLocation" },
-                unique: true,
-                filter: "[SubLocation] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_location_sublocation",
-                table: "Locations",
-                column: "SubLocation");
+                columns: new[] { "LocationName", "ComputedSubLocationForUniqueness" },
+                unique: true);
         }
 
         /// <inheritdoc />

@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.DirectoryMigration
 {
     [DbContext(typeof(DirectoryContext))]
-    [Migration("20250211042101_faxproperties")]
-    partial class faxproperties
+    [Migration("20250221060951_DirectoryEntity")]
+    partial class DirectoryEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -189,12 +189,10 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("FaxNumber")
                         .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("nvarchar(12)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ForwardTo")
-                        .HasMaxLength(12)
-                        .HasColumnType("nvarchar(12)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsForwarded")
                         .HasColumnType("bit");
@@ -270,6 +268,12 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ComputedSubLocationForUniqueness")
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("nvarchar(450)")
+                        .HasComputedColumnSql("isnull(SubLocation, 'NULL-MARKER')");
+
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -295,13 +299,9 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SubLocation")
-                        .HasDatabaseName("ix_location_sublocation");
-
-                    b.HasIndex("LocationName", "SubLocation")
+                    b.HasIndex("LocationName", "ComputedSubLocationForUniqueness")
                         .IsUnique()
-                        .HasDatabaseName("ix_location_name")
-                        .HasFilter("[SubLocation] IS NOT NULL");
+                        .HasDatabaseName("ix_location");
 
                     b.ToTable("Locations");
                 });
