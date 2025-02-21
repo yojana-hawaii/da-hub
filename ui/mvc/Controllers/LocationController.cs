@@ -173,14 +173,22 @@ public class LocationController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var location = await _context.Locations.FindAsync(id);
-        if (location != null)
+        var location = await _context.Locations.FirstOrDefaultAsync(j => j.Id == id);
+        try
         {
-            _context.Locations.Remove(location);
-        }
+            if (location != null)
+            {
+                _context.Locations.Remove(location);
+            }
 
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError("", "Unable to delete record. Cant think of a reason this could happen");
+        }
+        return View(location);
     }
 
 

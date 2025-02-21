@@ -162,16 +162,23 @@ public class DepartmentController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var department = await _context.Departments.FindAsync(id);
-        if (department != null)
+        var department = await _context.Departments.FirstOrDefaultAsync(m => m.Id == id);
+        try
         {
-            _context.Departments.Remove(department);
+            if (department != null)
+            {
+                _context.Departments.Remove(department);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
-
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError("", "Unable to delete record. Cant think of a reason this could happen");
+        }
+        return View(department);
     }
-
     private bool DepartmentExists(int id)
     {
         return _context.Departments.Any(e => e.Id == id);

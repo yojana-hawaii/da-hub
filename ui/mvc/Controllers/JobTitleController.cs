@@ -162,7 +162,10 @@ public class JobTitleController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var jobTitle = await _context.JobTitles.FindAsync(id);
+        var jobTitle = await _context.JobTitles.FirstOrDefaultAsync(j => j.Id == id);
+
+        try
+        {
         if (jobTitle != null)
         {
             _context.JobTitles.Remove(jobTitle);
@@ -170,6 +173,13 @@ public class JobTitleController : Controller
 
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
+
+        }
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError("", "Unable to delete record. Cant think of a reason this could happen");
+        }
+        return View(jobTitle);
     }
 
     private bool JobTitleExists(int id)
