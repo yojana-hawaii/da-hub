@@ -97,23 +97,24 @@ public class JobTitleController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("JobTitleName,JobTitleDescription")] JobTitle jobTitle)
+    public async Task<IActionResult> Edit(int id)
     {
-        if (id != jobTitle.Id)
+        var jobToUpdate = await _context.JobTitles.FirstOrDefaultAsync(j => j.Id == id);
+        if (jobToUpdate == null)
         {
             return NotFound();
         }
 
-        if (ModelState.IsValid)
+        if (await TryUpdateModelAsync<JobTitle>(jobToUpdate, "", j => j.JobTitleName, j => j.JobTitleDescription))
         {
             try
             {
-                _context.Update(jobTitle);
                 await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!JobTitleExists(jobTitle.Id))
+                if (!JobTitleExists(jobToUpdate.Id))
                 {
                     return NotFound();
                 }
@@ -122,9 +123,19 @@ public class JobTitleController : Controller
                     throw;
                 }
             }
-            return RedirectToAction(nameof(Index));
+            catch (DbUpdateException dex)
+            {
+                if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.JobTitles' with unique index 'ix_jobTitle_name'"))
+                {
+                    ModelState.AddModelError("JobTitleName", "Unable to save duplicate job title.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unable to save. Some problem I did not thing about.");
+                }
+            }
         }
-        return View(jobTitle);
+        return View(jobToUpdate);
     }
 
     // GET: JobTitle/Delete/5

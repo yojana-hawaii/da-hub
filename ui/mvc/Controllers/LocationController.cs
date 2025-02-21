@@ -74,7 +74,7 @@ public class LocationController : Controller
                 ModelState.AddModelError("", "Unable to save. Some problem I did not thing about.");
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             throw;
         }
@@ -105,23 +105,24 @@ public class LocationController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("LocationName,SubLocation")] Location location)
+    public async Task<IActionResult> Edit(int id)
     {
-        if (id != location.Id)
+        var locToUpdate = await _context.Locations.FirstOrDefaultAsync(l => l.Id == id);
+        if (locToUpdate == null)
         {
             return NotFound();
         }
 
-        if (ModelState.IsValid)
+        if (await TryUpdateModelAsync<Location>(locToUpdate, "", l => l.LocationName, l => l.SubLocation))
         {
             try
             {
-                _context.Update(location);
                 await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!LocationExists(location.Id))
+                if (!LocationExists(locToUpdate.Id))
                 {
                     return NotFound();
                 }
@@ -130,9 +131,19 @@ public class LocationController : Controller
                     throw;
                 }
             }
-            return RedirectToAction(nameof(Index));
+            catch (DbUpdateException dex)
+            {
+                if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Locations' with unique index"))
+                {
+                    ModelState.AddModelError("LocationName", "Unable to save duplicate location / sub-location pair.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unable to save. Some problem I did not thing about.");
+                }
+            }
         }
-        return View(location);
+        return View(locToUpdate);
     }
 
 

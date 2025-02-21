@@ -96,23 +96,25 @@ public class DepartmentController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("DepartmentName")] Department department)
+    public async Task<IActionResult> Edit(int id)
     {
-        if (id != department.Id)
+        var deptToUpdate = await _context.Departments.FirstOrDefaultAsync(d => d.Id == id);
+        if (deptToUpdate == null)
         {
             return NotFound();
         }
 
-        if (ModelState.IsValid)
+        if (await TryUpdateModelAsync<Department>(deptToUpdate, "", d => d.DepartmentName))
         {
             try
             {
-                _context.Update(department);
+                _context.Update(deptToUpdate);
                 await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!DepartmentExists(department.Id))
+                if (!DepartmentExists(deptToUpdate.Id))
                 {
                     return NotFound();
                 }
@@ -121,9 +123,19 @@ public class DepartmentController : Controller
                     throw;
                 }
             }
-            return RedirectToAction(nameof(Index));
+            catch (DbUpdateException dex)
+            {
+                if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Departments' with unique index 'ix_department_name'"))
+                {
+                    ModelState.AddModelError("DepartmentName", "Unable to save duplicate department name.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unable to save. Some problem I did not thing about.");
+                }
+            }
         }
-        return View(department);
+        return View(deptToUpdate);
     }
 
     // GET: Department/Delete/5

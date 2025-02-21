@@ -72,7 +72,7 @@ public class FaxController : Controller
         }
         catch (DbUpdateException dex)
         {
-            if(dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Faxes' with unique index 'ix_fax_number'"))
+            if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Faxes' with unique index 'ix_fax_number'"))
             {
                 ModelState.AddModelError("FaxNumber", "Unable to save duplicate fax number.");
             }
@@ -110,23 +110,28 @@ public class FaxController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("FaxName,FaxNumber,IsForwarded,ForwardTo,LocationId,DepartmentId")] Fax fax)
+    public async Task<IActionResult> Edit(int id)
     {
-        if (id != fax.Id)
+        var faxToUpdate = await _context.Faxes.FirstOrDefaultAsync(f => f.Id == id);
+
+        if (faxToUpdate == null)
         {
             return NotFound();
         }
 
-        if (ModelState.IsValid)
+        //removing default bind in parameter like in create method. Hidden properties like createdDate will be deleted.
+        if (await TryUpdateModelAsync<Fax>(faxToUpdate, "",
+            f => f.FaxName, f => f.FaxNumber, f => f.IsForwarded, f => f.ForwardTo, f => f.LocationId, f => f.DepartmentId
+            ))
         {
             try
             {
-                _context.Update(fax);
                 await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!FaxExists(fax.Id))
+                if (!FaxExists(faxToUpdate.Id))
                 {
                     return NotFound();
                 }
@@ -135,11 +140,21 @@ public class FaxController : Controller
                     throw;
                 }
             }
-            return RedirectToAction(nameof(Index));
+            catch (DbUpdateException dex)
+            {
+                if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Faxes' with unique index 'ix_fax_number'"))
+                {
+                    ModelState.AddModelError("FaxNumber", "Unable to save duplicate fax number.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unable to save. Some problem I did not thing about.");
+                }
+            }
         }
-        ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", fax.DepartmentId);
-        LocationDropdownList(fax);
-        return View(fax);
+        ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", faxToUpdate.DepartmentId);
+        LocationDropdownList(faxToUpdate);
+        return View(faxToUpdate);
     }
 
     // GET: Fax/Delete/5
