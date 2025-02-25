@@ -175,9 +175,16 @@ public class JobTitleController : Controller
         return RedirectToAction(nameof(Index));
 
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException dex)
         {
-            ModelState.AddModelError("", "Unable to delete record. Cant think of a reason this could happen");
+            if (dex.GetBaseException().Message.Contains("The DELETE statement conflicted with the REFERENCE constraint"))
+            {
+                ModelState.AddModelError("", "Unable to delete record. Job Title already used");
+            }
+            else
+            {
+                ModelState.AddModelError("", "Unable to delete record. Cant think of a reason this could happen");
+            }
         }
         return View(jobTitle);
     }

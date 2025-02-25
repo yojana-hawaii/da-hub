@@ -158,8 +158,7 @@ public class LocationController : Controller
         }
 
         var location = await _context.Locations
-            .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == id);
+            .FindAsync(id);
         if (location == null)
         {
             return NotFound();
@@ -173,7 +172,7 @@ public class LocationController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var location = await _context.Locations.FirstOrDefaultAsync(j => j.Id == id);
+        var location = await _context.Locations.FindAsync(id);
         try
         {
             if (location != null)
@@ -184,9 +183,16 @@ public class LocationController : Controller
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException dex)
         {
-            ModelState.AddModelError("", "Unable to delete record. Cant think of a reason this could happen");
+            if (dex.GetBaseException().Message.Contains("The DELETE statement conflicted with the REFERENCE constraint"))
+            {
+                ModelState.AddModelError("", "Unable to delete record. Location already used");
+            }
+            else
+            {
+                ModelState.AddModelError("", "Unable to delete record. Cant think of a reason this could happen");
+            }
         }
         return View(location);
     }
