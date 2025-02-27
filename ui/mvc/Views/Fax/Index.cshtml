@@ -22,9 +22,6 @@
                 @Html.DisplayNameFor(model => model.IsForwarded)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ForwardTo)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Location)
             </th>
             <th>
@@ -34,32 +31,49 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FaxName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FaxNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsForwarded)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ForwardTo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Location.Summary)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Department.DepartmentName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FaxName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FaxNumber)
+                </td>
+                <td>
+                    @{
+                        if (item.IsForwarded)
+                        {
+                            <a href="#" data-bs-toggle="tooltip" title="@item.ForwardTo">Yes</a>
+                        }
+                        else
+                        {
+                            @:No
+                        }
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Location.Summary)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Department.DepartmentName)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+@section Scripts{
+    <script type="text/javascript">
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(
+            function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}
