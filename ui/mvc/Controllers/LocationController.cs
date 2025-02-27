@@ -17,7 +17,7 @@ public class LocationController : Controller
     // GET: Location
     public async Task<IActionResult> Index()
     {
-        return View(await _context.Locations.AsNoTracking().ToListAsync());
+        return View(await _context.Locations.AsNoTracking().OrderBy(l => l.LocationName).ThenBy(s => s.SubLocation).ToListAsync());
     }
 
     // GET: Location/Details/5
@@ -65,7 +65,8 @@ public class LocationController : Controller
         }
         catch (DbUpdateException dex)
         {
-            if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Locations' with unique index"))
+            string err = dex.GetBaseException().Message;
+            if (err.Contains("unique") && err.Contains("ix_location"))
             {
                 ModelState.AddModelError("LocationName", "Unable to save duplicate location / sub-location pair.");
             }
@@ -133,7 +134,8 @@ public class LocationController : Controller
             }
             catch (DbUpdateException dex)
             {
-                if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Locations' with unique index"))
+                string err = dex.GetBaseException().Message;
+                if (err.Contains("unique") && err.Contains("ix_location"))
                 {
                     ModelState.AddModelError("LocationName", "Unable to save duplicate location / sub-location pair.");
                 }

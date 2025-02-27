@@ -72,7 +72,8 @@ public class FaxController : Controller
         }
         catch (DbUpdateException dex)
         {
-            if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Faxes' with unique index 'ix_fax_number'"))
+            string err = dex.GetBaseException().Message;
+            if (err.Contains("unique") && err.Contains("ix_fax_number"))
             {
                 ModelState.AddModelError("FaxNumber", "Unable to save duplicate fax number.");
             }
@@ -142,7 +143,8 @@ public class FaxController : Controller
             }
             catch (DbUpdateException dex)
             {
-                if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Faxes' with unique index 'ix_fax_number'"))
+                string err = dex.GetBaseException().Message;
+                if (err.Contains("unique") && err.Contains("ix_fax_number"))
                 {
                     ModelState.AddModelError("FaxNumber", "Unable to save duplicate fax number.");
                 }

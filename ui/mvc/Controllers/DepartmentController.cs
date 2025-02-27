@@ -63,7 +63,8 @@ public class DepartmentController : Controller
         }
         catch (DbUpdateException dex)
         {
-            if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Departments' with unique index 'ix_department_name'"))
+            string err = dex.GetBaseException().Message;
+            if (err.Contains("unique") && err.Contains("ix_department_name"))
             {
                 ModelState.AddModelError("DepartmentName", "Unable to save duplicate department name.");
             }
@@ -125,7 +126,8 @@ public class DepartmentController : Controller
             }
             catch (DbUpdateException dex)
             {
-                if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.Departments' with unique index 'ix_department_name'"))
+                string err = dex.GetBaseException().Message;
+                if (err.Contains("unique") && err.Contains("ix_department_name"))
                 {
                     ModelState.AddModelError("DepartmentName", "Unable to save duplicate department name.");
                 }

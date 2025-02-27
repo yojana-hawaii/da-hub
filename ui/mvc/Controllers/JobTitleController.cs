@@ -64,7 +64,8 @@ public class JobTitleController : Controller
         }
         catch (DbUpdateException dex)
         {
-            if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.JobTitles' with unique index 'ix_jobTitle_name'"))
+            string err = dex.GetBaseException().Message;
+            if (err.Contains("unique") && err.Contains("ix_jobTitle_name"))
             {
                 ModelState.AddModelError("JobTitleName", "Unable to save duplicate job title.");
             }
@@ -125,7 +126,8 @@ public class JobTitleController : Controller
             }
             catch (DbUpdateException dex)
             {
-                if (dex.GetBaseException().Message.Contains("Cannot insert duplicate key row in object 'dbo.JobTitles' with unique index 'ix_jobTitle_name'"))
+                string err = dex.GetBaseException().Message;
+                if (err.Contains("unique") && err.Contains("ix_jobTitle_name"))
                 {
                     ModelState.AddModelError("JobTitleName", "Unable to save duplicate job title.");
                 }
