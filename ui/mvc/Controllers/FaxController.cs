@@ -49,8 +49,7 @@ public class FaxController : Controller
     // GET: Fax/Create
     public IActionResult Create()
     {
-        ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName");
-        LocationDropdownList();
+        PopulateDropdownList();
         return View();
     }
 
@@ -83,8 +82,7 @@ public class FaxController : Controller
             }
         }
 
-        ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", fax.DepartmentId);
-        LocationDropdownList(fax);
+        PopulateDropdownList(fax);
         return View(fax);
     }
 
@@ -101,8 +99,7 @@ public class FaxController : Controller
         {
             return NotFound();
         }
-        ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", fax.DepartmentId);
-        LocationDropdownList(fax);
+        PopulateDropdownList(fax);
         return View(fax);
     }
 
@@ -154,8 +151,7 @@ public class FaxController : Controller
                 }
             }
         }
-        ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", faxToUpdate.DepartmentId);
-        LocationDropdownList(faxToUpdate);
+        PopulateDropdownList(faxToUpdate);
         return View(faxToUpdate);
     }
 
@@ -218,15 +214,25 @@ public class FaxController : Controller
     {
         return _context.Faxes.Any(e => e.Id == id);
     }
-
-    private void LocationDropdownList(Fax? fax = null)
+    
+    private SelectList LocationList(int? selectedLocationId)
     {
         var query = from d in _context.Locations
                     orderby d.LocationName, d.SubLocation
                     select d;
-        //ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "LocationName", fax.LocationId);
-
-        ViewData["LocationId"] = new SelectList(query, "Id", "Summary", fax?.LocationId);
+        var ret =  new SelectList(query, "Id", "Summary", selectedLocationId);
+        return ret;
+    }
+    private SelectList DepartmentList(int? selectedDepartmentId)
+    {
+        var ret =  new SelectList(_context.Departments.OrderBy(d => d.DepartmentName),"Id", "DepartmentName", selectedDepartmentId);
+        return ret;
+    }
+    private void PopulateDropdownList(Fax? fax = null)
+    {
+        ViewData["LocationId"] = LocationList(fax?.LocationId);
+        ViewData["DepartmentId"] = DepartmentList(fax?.DepartmentId);
     }
 
+    
 }
