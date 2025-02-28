@@ -36,4 +36,11 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+//to prepare the database and seed data. 
+using(var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    DirectoryInitializer.Initialize(services, true);
+}
+
 app.Run();
