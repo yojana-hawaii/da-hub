@@ -28,6 +28,7 @@ public class DirectoryContext : DbContext
     public DbSet<Department> Departments { get; set; }
     public DbSet<Location> Locations { get; set; }
     public DbSet<Fax> Faxes { get; set; }
+    public DbSet<EmployeeLocation> EmployeeeLocations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

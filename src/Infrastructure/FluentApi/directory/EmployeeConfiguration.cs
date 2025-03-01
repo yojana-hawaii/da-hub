@@ -29,12 +29,6 @@ internal class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .HasForeignKey(e => e.DepartmentId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
-        builder
-            .HasOne(e => e.Location)
-            .WithMany(e => e.Employees)
-            .HasForeignKey(e => e.LocationId)
-            .IsRequired(false)
-            .OnDelete(DeleteBehavior.Restrict);
 
 
         //self reference keys

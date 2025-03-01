@@ -77,6 +77,16 @@ public static class DirectoryInitializer
                     {
                         SeedFax(_context, user, now, rnd);
                     }
+
+                    if (!_context.Employees.Any())
+                    {
+                        SeedEmployee(_context, user, now, rnd);
+                    }
+
+                    if (!_context.EmployeeeLocations.Any())
+                    {
+                        SeedEmployeeLocation(_context, user, now, rnd);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -84,6 +94,103 @@ public static class DirectoryInitializer
                 }
             }
             #endregion
+        }
+    }
+
+    private static void SeedEmployeeLocation(DirectoryContext context, string user, DateTime now, Random rnd)
+    {
+        var empCount = context.Employees.Count();
+        var locCount = context.Locations.Count();
+
+        for (var i = 0; i <= 30; i++)
+        {
+            var empLoc = new EmployeeLocation
+            {
+                EmployeeId = rnd.Next(1, empCount + 1),
+                LocationId = rnd.Next(1, locCount + 1)
+            };
+            try
+            {
+                context.EmployeeeLocations.Add(empLoc);
+            }
+            catch (Exception ex)
+            {
+                context.EmployeeeLocations.Remove(empLoc);
+                Debug.WriteLine(ex.GetBaseException().Message);
+            }
+        }
+        try
+        {
+            context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.GetBaseException().Message);
+        }
+    }
+
+    private static void SeedEmployee(DirectoryContext context, string user, DateTime now, Random rnd)
+    {
+        var firstnames = new string[] { "Trent", "Virgil", "Abrille", "Diamond", "Aurelia", "Harvey", "Dara", "Della", "Everest", "Juniper", "Kai", "Kiara", "Napheesa", "Lorraine", "Rafael" };
+        var lastnames = new string[] { "Gerrard", "Van Dijk", "Quansah", "Salah", "Diaz", "Nunez", "Gakpo", "Konate", "Becker", "Anthony-Towns", "Grugier-Hill", "Bynum", "Hockenson", "Mundt", "Tyson" };
+
+        var totalEmp = 30;
+
+        var firstCount = firstnames.Count();
+        var lastCount = lastnames.Count();
+        var deptCount = context.Departments.Count();
+
+        var jobCount = context.JobTitles.Count();
+        var bigBoss = rnd.Next(1, totalEmp);
+
+        for (var i = 0; i <= totalEmp; i++)
+        {
+            var first = firstnames[rnd.Next(0, firstCount)];
+            var last = lastnames[rnd.Next(0, lastCount)];
+            var extension = rnd.Next(500, 599);
+
+            var emp = new Employee
+            {
+                FirstName = first,
+                LastName = last,
+                Username = $"{first}.{last}",
+                Email = $"{first}.{last}@email.com",
+                Extension = $"{extension}",
+                PhoneNumber = $"8002158{extension}",
+                JobTitleId = rnd.Next(1, jobCount + 1),
+                DepartmentId = rnd.Next(1, deptCount + 1)
+            };
+
+            try
+            {
+                context.Employees.Add(emp);
+            }
+            catch (Exception ex)
+            {
+                context.Employees.Remove(emp);
+                Debug.WriteLine(ex.GetBaseException().Message);
+            }
+        }
+        try
+        {
+            context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.GetBaseException().Message);
+        }
+
+        foreach (var emp in context.Employees)
+        {
+            emp.PrimaryManagerId = rnd.Next(1, 5);
+        }
+        try
+        {
+            context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.GetBaseException().Message);
         }
     }
 
@@ -122,19 +229,32 @@ public static class DirectoryInitializer
             }
         }
 
-        context.SaveChanges();
+        try
+        {
+            context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.GetBaseException().Message);
+        }
     }
 
     private static void SeedJobTitle(DirectoryContext context, string user, DateTime now)
     {
-        var jobTitles = new string[] { "ceo", "payroll", "manager", "chef" };
+        var jobTitles = new string[] { "big-boss", "medium-boss-1", "medium-boss-2", "medium-boss-3", "not-boss" };
         foreach (var job in jobTitles)
         {
             var j = new JobTitle { JobTitleName = job };
             context.JobTitles.Add(j);
         }
-        ;
-        context.SaveChanges();
+        try
+        {
+            context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.GetBaseException().Message);
+        }
     }
 
     private static void SeedLocation(DirectoryContext context, string user, DateTime now)
@@ -195,9 +315,14 @@ public static class DirectoryInitializer
             new Department{ DepartmentName = "marketing" },
             new Department{ DepartmentName = "delivery" }
         };
-        context.Departments.AddRange(departments);
-        context.SaveChanges();
+        try
+        {
+            context.Departments.AddRange(departments);
+            context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.GetBaseException().Message);
+        }
     }
-
-
 }

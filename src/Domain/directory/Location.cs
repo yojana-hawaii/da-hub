@@ -32,7 +32,10 @@ public class Location : AuditableEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public string ComputedSubLocationForUniqueness { get; set; } = "";
 
+    //many to many with location
+    [Display(Name = "Employee Location")]
+    public ICollection<EmployeeLocation> EmployeeLocations { get; set; } = new HashSet<EmployeeLocation>();
 
-    public IEnumerable<Employee> Employees { get; set; } = new HashSet<Employee>();
+    //one to many foreign key
     public IEnumerable<Fax> Faxes { get; set; } = new HashSet<Fax>();
 }

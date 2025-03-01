@@ -53,8 +53,9 @@ public class Employee : AuditableEntity
     public int? DepartmentId { get; set; }
     public Department? Department { get; set; }
 
-    public int? LocationId { get; set; }
-    public Location? Location { get; set; }
+    //many to many with location
+    [Display(Name = "Employee Location")]
+    public ICollection<EmployeeLocation> EmployeeLocations { get; set; } = new HashSet<EmployeeLocation>();
 
     //Self-Referencing foreign key
     public int? PrimaryManagerId { get; set; }
