@@ -96,26 +96,36 @@ public static class DirectoryInitializer
 
     private static void SeedEmployeeLocation(DirectoryContext context, Random rnd)
     {
-        var empCount = context.Employees.Count();
-        var locCount = context.Locations.Count();
+        //Ids could be deleted over time. Need to select what is available
+        int[] empIds = context.Employees.Select(s => s.Id).ToArray();
+        var empCount = empIds.Length;
 
-        for (var i = 0; i <= 30; i++)
+        int[] locIds = context.Locations.Select(s => s.Id).ToArray();
+        var locCount = locIds.Length;
+
+        foreach( var id in empIds)
         {
-            var empLoc = new EmployeeLocation
+            int howManyLocations = rnd.Next(1, 5);
+            for(int i =1; i <= howManyLocations; i++)
             {
-                EmployeeId = rnd.Next(1, empCount + 1),
-                LocationId = rnd.Next(1, locCount + 1)
-            };
-            try
-            {
-                context.EmployeeeLocations.Add(empLoc);
-            }
-            catch (Exception ex)
-            {
-                context.EmployeeeLocations.Remove(empLoc);
-                Debug.WriteLine(ex.GetBaseException().Message);
+                int locId = rnd.Next(1, locCount + 1);
+                EmployeeLocation empLoc = new EmployeeLocation()
+                {
+                    EmployeeId = id,
+                    LocationId = locId
+                };
+                try
+                {
+                    context.EmployeeeLocations.Add(empLoc);
+                }
+                catch (Exception ex)
+                {
+                    context.EmployeeeLocations.Remove(empLoc);
+                    Debug.WriteLine(ex.GetBaseException().Message);
+                }
             }
         }
+
         try
         {
             context.SaveChanges();
