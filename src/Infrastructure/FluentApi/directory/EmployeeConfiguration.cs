@@ -33,13 +33,13 @@ internal class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
 
         //self reference keys
         builder
-            .HasOne(e => e.PrimaryManager)
+            .HasOne(e => e.Manager)
             .WithMany(m => m.PrimaryStaff)
-            .HasForeignKey(e => e.PrimaryManagerId)
+            .HasForeignKey(e => e.ManagerId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .Property(e => e.PrimaryManagerId)
+            .Property(e => e.ManagerId)
             .IsRequired(false);
 
     }

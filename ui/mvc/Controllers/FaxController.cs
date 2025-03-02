@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Domain.directory;
 using Infrastructure.dbcontext;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace mvc.Controllers;
 
@@ -68,6 +69,10 @@ public class FaxController : Controller
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+        }
+        catch (RetryLimitExceededException) // begin tranaction & rollback automatic ef core
+        {
+            ModelState.AddModelError("", "Unable to save after multiple attemps. Call Microsoft.");
         }
         catch (DbUpdateException dex)
         {

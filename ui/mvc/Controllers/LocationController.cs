@@ -75,7 +75,7 @@ public class LocationController : Controller
                 ModelState.AddModelError("", "Unable to save. Some problem I did not thing about.");
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             throw;
         }

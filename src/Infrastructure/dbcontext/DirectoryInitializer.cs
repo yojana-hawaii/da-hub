@@ -12,92 +12,89 @@ public static class DirectoryInitializer
     /// </summary>
     /// <param name="serviceProvider">DI Container</param>
     /// <param name="DeleteDatabase">Delete database and start from scratch</param>
-    /// <param name="UserMigrations">User Migration or EnsureCreated</param>
+    /// <param name="UseMigrations">User Migration or EnsureCreated</param>
     /// <param name="SeedSampleData">Add Sample data</param>
     public static void Initialize(IServiceProvider serviceProvider,
         bool DeleteDatabase = false, bool UseMigrations = true, bool SeedSampleData = true)
     {
-        using (var _context = new DirectoryContext(serviceProvider.GetRequiredService<DbContextOptions<DirectoryContext>>()))
+        using DirectoryContext _context = new(serviceProvider.GetRequiredService<DbContextOptions<DirectoryContext>>());
+
+        #region Prepare the database depedning on options
+        try
         {
-            #region Prepare the database depedning on options
+            //using migration
+            if (UseMigrations)
+            {
+                if (DeleteDatabase)
+                {
+                    _context.Database.EnsureDeleted(); //delete exisiting version
+                }
+                _context.Database.Migrate(); // apply all migrationa
+            }
+            else //no migration.Delete everything and recreate
+            {
+                if (DeleteDatabase)
+                {
+                    _context.Database.EnsureDeleted();
+                    _context.Database.EnsureCreated();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.GetBaseException().Message);
+        }
+        #endregion
+
+        #region Add data that is applicable to sample or production data
+        #endregion
+
+        #region Seed sample data
+        if (SeedSampleData)
+        {
+            Random rnd = new();
+
             try
             {
-                //using migration
-                if (UseMigrations)
+                if (!_context.Locations.Any())
                 {
-                    if (DeleteDatabase)
-                    {
-                        _context.Database.EnsureDeleted(); //delete exisiting version
-                    }
-                    _context.Database.Migrate(); // apply all migrationa
+                    SeedLocation(_context);
                 }
-                else //no migration.Delete everything and recreate
+
+                if (!_context.JobTitles.Any())
                 {
-                    if (DeleteDatabase)
-                    {
-                        _context.Database.EnsureDeleted();
-                        _context.Database.EnsureCreated();
-                    }
+                    SeedJobTitle(_context);
+                }
+
+                if (!_context.Departments.Any())
+                {
+                    SeedDepartment(_context);
+                }
+
+                if (!_context.Faxes.Any())
+                {
+                    SeedFax(_context, rnd);
+                }
+
+                if (!_context.Employees.Any())
+                {
+                    SeedEmployee(_context, rnd);
+                }
+
+                if (!_context.EmployeeeLocations.Any())
+                {
+                    SeedEmployeeLocation(_context, rnd);
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.GetBaseException().Message);
             }
-            #endregion
-
-            #region Add data that is applicable to sample or production data
-            #endregion
-
-            #region Seed sample data
-            if (SeedSampleData)
-            {
-                Random rnd = new Random();
-
-                var user = "manual-seed";
-                var now = DateTime.Now;
-                try
-                {
-                    if (!_context.Locations.Any())
-                    {
-                        SeedLocation(_context, user, now);
-                    }
-
-                    if (!_context.JobTitles.Any())
-                    {
-                        SeedJobTitle(_context, user, now);
-                    }
-
-                    if (!_context.Departments.Any())
-                    {
-                        SeedDepartment(_context, user, now);
-                    }
-
-                    if (!_context.Faxes.Any())
-                    {
-                        SeedFax(_context, user, now, rnd);
-                    }
-
-                    if (!_context.Employees.Any())
-                    {
-                        SeedEmployee(_context, user, now, rnd);
-                    }
-
-                    if (!_context.EmployeeeLocations.Any())
-                    {
-                        SeedEmployeeLocation(_context, user, now, rnd);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.GetBaseException().Message);
-                }
-            }
-            #endregion
         }
+        #endregion
     }
 
-    private static void SeedEmployeeLocation(DirectoryContext context, string user, DateTime now, Random rnd)
+    private static void SeedEmployeeLocation(DirectoryContext context, Random rnd)
     {
         var empCount = context.Employees.Count();
         var locCount = context.Locations.Count();
@@ -129,19 +126,18 @@ public static class DirectoryInitializer
         }
     }
 
-    private static void SeedEmployee(DirectoryContext context, string user, DateTime now, Random rnd)
+    private static void SeedEmployee(DirectoryContext context, Random rnd)
     {
         var firstnames = new string[] { "Trent", "Virgil", "Abrille", "Diamond", "Aurelia", "Harvey", "Dara", "Della", "Everest", "Juniper", "Kai", "Kiara", "Napheesa", "Lorraine", "Rafael" };
         var lastnames = new string[] { "Gerrard", "Van Dijk", "Quansah", "Salah", "Diaz", "Nunez", "Gakpo", "Konate", "Becker", "Anthony-Towns", "Grugier-Hill", "Bynum", "Hockenson", "Mundt", "Tyson" };
 
         var totalEmp = 30;
 
-        var firstCount = firstnames.Count();
-        var lastCount = lastnames.Count();
+        var firstCount = firstnames.Length;
+        var lastCount = lastnames.Length;
         var deptCount = context.Departments.Count();
 
         var jobCount = context.JobTitles.Count();
-        var bigBoss = rnd.Next(1, totalEmp);
 
         for (var i = 0; i <= totalEmp; i++)
         {
@@ -182,7 +178,7 @@ public static class DirectoryInitializer
 
         foreach (var emp in context.Employees)
         {
-            emp.PrimaryManagerId = rnd.Next(1, 5);
+            emp.ManagerId = rnd.Next(1, 5);
         }
         try
         {
@@ -194,7 +190,7 @@ public static class DirectoryInitializer
         }
     }
 
-    private static void SeedFax(DirectoryContext context, string user, DateTime now, Random random)
+    private static void SeedFax(DirectoryContext context, Random random)
     {
         var locCount = context.Locations.Count();
         var deptCount = context.Departments.Count();
@@ -239,7 +235,7 @@ public static class DirectoryInitializer
         }
     }
 
-    private static void SeedJobTitle(DirectoryContext context, string user, DateTime now)
+    private static void SeedJobTitle(DirectoryContext context)
     {
         var jobTitles = new string[] { "big-boss", "medium-boss-1", "medium-boss-2", "medium-boss-3", "not-boss" };
         foreach (var job in jobTitles)
@@ -257,7 +253,7 @@ public static class DirectoryInitializer
         }
     }
 
-    private static void SeedLocation(DirectoryContext context, string user, DateTime now)
+    private static void SeedLocation(DirectoryContext context)
     {
         var buildings = new string[] { "Building-A", "Building-B", "Building-C", "Building-D" };
 
@@ -266,8 +262,8 @@ public static class DirectoryInitializer
         var sub3 = new string[] { "Room 1", "Room 2", "Room 3" };
         var sub = new string[][] { sub1, sub2, sub3 };
 
-        var buildingCount = buildings.Count();
-        var subCount = sub.Count();
+        var buildingCount = buildings.Length;
+        var subCount = sub.Length;
         var max = buildingCount > subCount ? buildingCount : subCount;
 
         try
@@ -304,7 +300,7 @@ public static class DirectoryInitializer
         }
     }
 
-    private static void SeedDepartment(DirectoryContext context, string user, DateTime now)
+    private static void SeedDepartment(DirectoryContext context)
     {
         var departments = new[]
         {

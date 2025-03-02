@@ -54,16 +54,17 @@ public class Employee : AuditableEntity
     public Department? Department { get; set; }
 
     //many to many with location
-    [Display(Name = "Employee Location")]
+    [Display(Name = "Locations")]
     public ICollection<EmployeeLocation> EmployeeLocations { get; set; } = new HashSet<EmployeeLocation>();
 
     //Self-Referencing foreign key
-    public int? PrimaryManagerId { get; set; }
-    public Employee? PrimaryManager { get; set; }
+    public int? ManagerId { get; set; }
+    public Employee? Manager { get; set; }
 
 
 
 
     //Two-way foreign key loop
+    [Display(Name = "Direct Reports")]
     public IEnumerable<Employee> PrimaryStaff { get; set; } = new HashSet<Employee>();
 }

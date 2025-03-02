@@ -33,7 +33,7 @@ public class Location : AuditableEntity
     public string ComputedSubLocationForUniqueness { get; set; } = "";
 
     //many to many with location
-    [Display(Name = "Employee Location")]
+    [Display(Name = "Employees")]
     public ICollection<EmployeeLocation> EmployeeLocations { get; set; } = new HashSet<EmployeeLocation>();
 
     //one to many foreign key
