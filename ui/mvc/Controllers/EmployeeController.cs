@@ -18,7 +18,12 @@ namespace mvc.Controllers
         // GET: Employee
         public async Task<IActionResult> Index()
         {
-            var directoryContext = _context.Employees.Include(e => e.Department).Include(e => e.JobTitle).Include(e => e.Manager);
+            var directoryContext = _context.Employees
+                .Include(e => e.Department)
+                .Include(e => e.JobTitle)
+                .Include(e => e.Manager)
+                .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
+                .AsNoTracking();
             return View(await directoryContext.ToListAsync());
         }
 
