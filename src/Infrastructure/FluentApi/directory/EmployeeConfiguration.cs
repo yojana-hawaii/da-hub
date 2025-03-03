@@ -12,10 +12,6 @@ internal class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.HasAlternateKey(e => e.Username).HasName("ix_employee_username");
         builder.HasAlternateKey(e => e.Email).HasName("ix_employee_email");
 
-        builder
-            .HasIndex(e => e.Keyword)
-            .HasDatabaseName("ix_employee_keyword");
-
         //foreign keys
         builder
             .HasOne(e => e.JobTitle)

@@ -9,6 +9,32 @@ public class Employee : AuditableEntity
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
+    [Display(Name = "Name")]
+    public string Summary
+    {
+        get
+        {
+            return LastName + ", " + FirstName;
+        }
+    }
+    [Display(Name = "Search Keywords")]
+    public string SearchKeywords
+    {
+        get
+        {
+            return FirstName + " " + LastName + " " + Extension + " " + PhoneNumber + " " + Username + " "
+                + JobTitle?.JobTitleName + " " + Department?.DepartmentName + " " + EmployeeLocations.ToString();
+        }
+    }
+    [Display(Name = "Created")]
+    public DateOnly AccountCreatedDate
+    {
+        get
+        {
+            return DateOnly.FromDateTime(AccountCreated);
+        }
+    }
+
 
     // from AD - can't modify
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
@@ -17,11 +43,15 @@ public class Employee : AuditableEntity
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
     [DataType(DataType.EmailAddress)]
     public required string Email { get; set; }
+
+    [Display(Name = "Created")]
     public DateTime AccountCreated { get; set; }
 
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
+    [Display(Name = "First Name")]
     public required string FirstName { get; set; }
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
+    [Display(Name = "Last Name")]
     public required string LastName { get; set; }
 
 
@@ -29,18 +59,17 @@ public class Employee : AuditableEntity
     [StringLength(5, ErrorMessage = "{0} cannot exceed {1} characters")]
     public string? Extension { get; set; }
     [DataType(DataType.PhoneNumber)]
+    [Display(Name = "Phone Number")]
     public string? PhoneNumber { get; set; }
-
-    //for search
-    [StringLength(500, ErrorMessage = "{0} cannot exceed {1} characters")]
-    public string? Keyword { get; set; }
 
 
 
     //in the future -DateTime not nullable from fluent API
+    [Display(Name = "Hire Date")]
     public DateTime? HireDate { get; set; }
-    public string? NickName { get; set; }
+    public string? Nickname { get; set; }
     [MaxLength(20)]
+    [Display(Name = "Employee Number")]
     public string? EmployeeNumber { get; set; }
     public string? PhotoPath { get; set; }
 
@@ -48,6 +77,7 @@ public class Employee : AuditableEntity
 
     //Foreign key
     public int? JobTitleId { get; set; }
+    [Display(Name = "Job Title")]
     public JobTitle? JobTitle { get; set; }
 
     public int? DepartmentId { get; set; }

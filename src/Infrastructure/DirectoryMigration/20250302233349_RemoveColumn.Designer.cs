@@ -4,6 +4,7 @@ using Infrastructure.dbcontext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.DirectoryMigration
 {
     [DbContext(typeof(DirectoryContext))]
-    partial class DirectoryContextModelSnapshot : ModelSnapshot
+    [Migration("20250302233349_RemoveColumn")]
+    partial class RemoveColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,7 +58,7 @@ namespace Infrastructure.DirectoryMigration
                         .IsUnique()
                         .HasDatabaseName("ix_department_name");
 
-                    b.ToTable("Departments", (string)null);
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("Domain.directory.Employee", b =>
@@ -146,7 +149,7 @@ namespace Infrastructure.DirectoryMigration
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("Employees", (string)null);
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("Domain.directory.EmployeeLocation", b =>
@@ -175,7 +178,7 @@ namespace Infrastructure.DirectoryMigration
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("EmployeeeLocations", (string)null);
+                    b.ToTable("EmployeeeLocations");
                 });
 
             modelBuilder.Entity("Domain.directory.Fax", b =>
@@ -231,7 +234,7 @@ namespace Infrastructure.DirectoryMigration
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("Faxes", (string)null);
+                    b.ToTable("Faxes");
                 });
 
             modelBuilder.Entity("Domain.directory.JobTitle", b =>
@@ -271,7 +274,7 @@ namespace Infrastructure.DirectoryMigration
                         .IsUnique()
                         .HasDatabaseName("ix_jobTitle_name");
 
-                    b.ToTable("JobTitles", (string)null);
+                    b.ToTable("JobTitles");
                 });
 
             modelBuilder.Entity("Domain.directory.Location", b =>
@@ -317,7 +320,7 @@ namespace Infrastructure.DirectoryMigration
                         .IsUnique()
                         .HasDatabaseName("ix_location");
 
-                    b.ToTable("Locations", (string)null);
+                    b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("Domain.directory.Employee", b =>
