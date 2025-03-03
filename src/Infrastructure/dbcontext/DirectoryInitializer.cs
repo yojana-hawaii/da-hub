@@ -247,7 +247,7 @@ public static class DirectoryInitializer
 
     private static void SeedJobTitle(DirectoryContext context)
     {
-        var jobTitles = new string[] { "big-boss", "medium-boss-1", "medium-boss-2", "medium-boss-3", "not-boss" };
+        var jobTitles = new string[] { "big-boss", "baby-boss", "wannabe-boss", "boss-lady", "not-boss" };
         foreach (var job in jobTitles)
         {
             var j = new JobTitle { JobTitleName = job };

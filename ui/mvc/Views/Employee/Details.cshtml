@@ -4,101 +4,110 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>Employee Details</h1>
 
 <div>
     <h4>Employee</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Username)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Username)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Email)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Email)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AccountCreated)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AccountCreatedDate)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AccountCreated)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.AccountCreatedDate)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.FirstName)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.FirstName)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.LastName)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.LastName)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Extension)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Extension)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PhoneNumber)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PhoneNumber)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Keyword)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.SearchKeywords)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Keyword)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.SearchKeywords)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.HireDate)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.HireDate)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NickName)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Nickname)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NickName)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Nickname)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.EmployeeNumber)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.EmployeeNumber)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PhotoPath)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PhotoPath)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.JobTitle)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.JobTitle.JobTitleName)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Department)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Department.DepartmentName)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.EmployeeLocations)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var loc in Model.EmployeeLocations)
+            {
+                @loc.Location.Summary <br />
+            }
+        </dd>
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Manager)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Manager.Email)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Manager.Summary)
         </dd>
     </dl>
 </div>

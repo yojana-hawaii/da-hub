@@ -39,6 +39,8 @@ namespace mvc.Controllers
                 .Include(e => e.Department)
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
+                .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (employee == null)
             {
@@ -51,9 +53,7 @@ namespace mvc.Controllers
         // GET: Employee/Create
         public IActionResult Create()
         {
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName");
-            ViewData["JobTitleId"] = new SelectList(_context.JobTitles, "Id", "JobTitleName");
-            ViewData["ManagerId"] = new SelectList(_context.Employees, "Id", "Email");
+            PopulateDropdownLists(); 
             return View();
         }
 
@@ -62,7 +62,7 @@ namespace mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Username,Email,AccountCreated,FirstName,LastName,Extension,PhoneNumber,Keyword,HireDate,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee)
+        public async Task<IActionResult> Create([Bind("Username,Email,FirstName,LastName,Extension,PhoneNumber,Keyword,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee)
         {
             if (ModelState.IsValid)
             {
@@ -70,11 +70,11 @@ namespace mvc.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", employee.DepartmentId);
-            ViewData["JobTitleId"] = new SelectList(_context.JobTitles, "Id", "JobTitleName", employee.JobTitleId);
-            ViewData["ManagerId"] = new SelectList(_context.Employees, "Id", "Email", employee.ManagerId);
+            PopulateDropdownLists(employee);
             return View(employee);
         }
+
+
 
         // GET: Employee/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -89,9 +89,7 @@ namespace mvc.Controllers
             {
                 return NotFound();
             }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", employee.DepartmentId);
-            ViewData["JobTitleId"] = new SelectList(_context.JobTitles, "Id", "JobTitleName", employee.JobTitleId);
-            ViewData["ManagerId"] = new SelectList(_context.Employees, "Id", "Email", employee.ManagerId);
+            PopulateDropdownLists(employee);
             return View(employee);
         }
 
@@ -100,7 +98,7 @@ namespace mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Username,Email,AccountCreated,FirstName,LastName,Extension,PhoneNumber,Keyword,HireDate,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind("Username,Email,AccountCreated,FirstName,LastName,Extension,PhoneNumber,Keyword,HireDate,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee)
         {
             if (id != employee.Id)
             {
@@ -127,9 +125,7 @@ namespace mvc.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DepartmentName", employee.DepartmentId);
-            ViewData["JobTitleId"] = new SelectList(_context.JobTitles, "Id", "JobTitleName", employee.JobTitleId);
-            ViewData["ManagerId"] = new SelectList(_context.Employees, "Id", "Email", employee.ManagerId);
+            PopulateDropdownLists(employee);
             return View(employee);
         }
 
@@ -145,6 +141,7 @@ namespace mvc.Controllers
                 .Include(e => e.Department)
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
+                .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (employee == null)
             {
@@ -169,9 +166,33 @@ namespace mvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        
         private bool EmployeeExists(int id)
         {
             return _context.Employees.Any(e => e.Id == id);
+        }
+
+        private void PopulateDropdownLists(Employee? employee = null)
+        {
+
+            ViewData["DepartmentId"] = Departmentlist(employee?.DepartmentId);
+            ViewData["JobTitleId"] = JobTitleList(employee?.JobTitleId);
+            ViewData["ManagerId"] = ManagerList(employee?.ManagerId);
+        }
+
+        private SelectList ManagerList(int? managerId)
+        {
+            return new SelectList(_context.Employees.OrderBy(m => m.Summary), "Id", "Summary", managerId);
+        }
+
+        private SelectList JobTitleList(int? jobTitleId)
+        {
+            return new SelectList(_context.JobTitles.OrderBy(j => j.JobTitleName), "Id", "JobTitleName", jobTitleId);
+        }
+
+        private SelectList Departmentlist(int? departmentId)
+        {
+            return new SelectList(_context.Departments.OrderBy(d => d.DepartmentName), "Id", "DepartmentName", departmentId);
         }
     }
 }
