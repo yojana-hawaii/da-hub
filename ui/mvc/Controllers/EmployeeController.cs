@@ -208,7 +208,16 @@ namespace mvc.Controllers
 
         private SelectList ManagerList(int? managerId)
         {
-            return new SelectList(_context.Employees.OrderBy(m => m.Summary), "Id", "Summary", managerId);
+            var managerIds = _context.Employees.Select(e => e.ManagerId).Distinct().ToList();
+            List<Employee> managers = new();
+
+            foreach(var tempId in managerIds)
+            {
+                var manager = _context.Employees.FirstOrDefault(e => e.Id == tempId);
+                managers.Add(manager);
+            }
+
+            return new SelectList( managers.OrderBy(m => m.LastName), "Id", "Summary", managerId);
         }
 
         private SelectList JobTitleList(int? jobTitleId)
