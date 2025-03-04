@@ -10,17 +10,20 @@ public class Fax : AuditableEntity, IValidatableObject
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
+    [Display(Name = "Fax")]
+    public string FaxFormatted => "(" + FaxNumber?.Substring(0, 3) + ") " + FaxNumber?.Substring(3, 3) + "-" + FaxNumber?[6..];
+
 
     [Display(Name = "Fax Name")]
-    [Required(ErrorMessage = "Fax name is required.")]
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
-    public required string FaxName { get; set; }
+    [Required(ErrorMessage = "Cannot leave {0} blank")]
+    public string FaxName { get; set; } = "";
 
 
-    [Required(ErrorMessage = "Fax number is required.")]
     [Display(Name = "Fax Number")]
+    [Required(ErrorMessage = "Cannot leave {0} blank")]
     [Phone]
-    public required string FaxNumber { get; set; }
+    public string FaxNumber { get; set; } = "";
 
 
 

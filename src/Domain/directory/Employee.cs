@@ -26,6 +26,9 @@ public class Employee : AuditableEntity
                 + JobTitle?.JobTitleName + " " + Department?.DepartmentName + " " + EmployeeLocations.ToString();
         }
     }
+    [Display(Name = "Phone")]
+    public string PhoneFormatted => "(" + PhoneNumber?.Substring(0, 3) + ") " + PhoneNumber?.Substring(3, 3) + "-" + PhoneNumber?[6..];
+
     [Display(Name = "Created")]
     public DateOnly AccountCreatedDate
     {
@@ -38,21 +41,26 @@ public class Employee : AuditableEntity
 
     // from AD - can't modify
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
-    public required string Username { get; set; }
+    [Required(ErrorMessage = "Cannot leave {0} blank")]
+    public string Username { get; set; } = "";
 
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
     [DataType(DataType.EmailAddress)]
-    public required string Email { get; set; }
-
-    [Display(Name = "Created")]
-    public DateTime AccountCreated { get; set; }
+    [Required(ErrorMessage = "Cannot leave {0} blank")]
+    public string Email { get; set; } = "";
 
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
     [Display(Name = "First Name")]
-    public required string FirstName { get; set; }
+    [Required(ErrorMessage = "Cannot leave {0} blank")]
+    public string FirstName { get; set; } = "";
+
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
     [Display(Name = "Last Name")]
-    public required string LastName { get; set; }
+    [Required(ErrorMessage = "Cannot leave {0} blank")]
+    public string LastName { get; set; } = "";
+
+    [Display(Name = "Created")]
+    public DateTime AccountCreated { get; set; }
 
 
     //from AD but modify from webapp
