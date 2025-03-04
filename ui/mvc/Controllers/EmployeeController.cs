@@ -3,6 +3,7 @@ using Infrastructure.dbcontext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using mvc.ViewModel;
 
 namespace mvc.Controllers
 {
@@ -53,8 +54,10 @@ namespace mvc.Controllers
         // GET: Employee/Create
         public IActionResult Create()
         {
+            Employee employee = new();
+            PopulateLocationCheckboxList(employee);
             PopulateDropdownLists(); 
-            return View();
+            return View(employee);
         }
 
         // POST: Employee/Create
@@ -170,6 +173,29 @@ namespace mvc.Controllers
         private bool EmployeeExists(int id)
         {
             return _context.Employees.Any(e => e.Id == id);
+        }
+
+        /// <summary>
+        /// good for create and delete. Edit needs a little more
+        /// allOptions has all locations, IsSelected is true only if current employee has locationId in their intersection table
+        /// </summary>
+        /// <param name="employee"></param>
+        private void PopulateLocationCheckboxList(Employee employee)
+        {
+            var allOptions = _context.Locations;
+            var currentSelectedIds = new HashSet<int>(employee.EmployeeLocations.Select(el => el.LocationId));
+            var checkBoxes = new List<CheckOptionVM>();
+
+            foreach(var option in allOptions)
+            {
+                checkBoxes.Add(new CheckOptionVM
+                {
+                    Id = option.Id,
+                    DisplayText = option.Summary,
+                    IsSelected = currentSelectedIds.Contains(option.Id)
+                });
+            }
+            ViewData["LocationOptions"] = checkBoxes;
         }
 
         private void PopulateDropdownLists(Employee? employee = null)
