@@ -27,7 +27,7 @@ public class Employee : AuditableEntity
         }
     }
     [Display(Name = "Phone")]
-    public string PhoneFormatted => "(" + PhoneNumber?.Substring(0, 3) + ") " + PhoneNumber?.Substring(3, 3) + "-" + PhoneNumber?[6..];
+    public string PhoneFormatted => "(" + PhoneNumber?[..3] + ") " + PhoneNumber?.Substring(3, 3) + "-" + PhoneNumber?[6..];
 
     [Display(Name = "Created")]
     public DateOnly AccountCreatedDate
