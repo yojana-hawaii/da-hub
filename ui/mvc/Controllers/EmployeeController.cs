@@ -3,6 +3,7 @@ using Infrastructure.dbcontext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using mvc.ViewModel;
 
 namespace mvc.Controllers
@@ -19,13 +20,13 @@ namespace mvc.Controllers
         // GET: Employee
         public async Task<IActionResult> Index()
         {
-            var directoryContext = _context.Employees
+            var employees = _context.Employees
                 .Include(e => e.Department)
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .AsNoTracking();
-            return View(await directoryContext.ToListAsync());
+            return View(await employees.ToListAsync());
         }
 
         // GET: Employee/Details/5
@@ -56,7 +57,7 @@ namespace mvc.Controllers
         {
             Employee employee = new();
             PopulateLocationCheckboxList(employee);
-            PopulateDropdownLists(); 
+            PopulateDropdownLists();
             return View(employee);
         }
 
@@ -65,14 +66,48 @@ namespace mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Username,Email,FirstName,LastName,Extension,PhoneNumber,Keyword,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee)
+        public async Task<IActionResult> Create([Bind("Username,Email,FirstName,LastName,Extension,PhoneNumber," +
+                            "NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee, string[] selectedOptions)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(employee);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (selectedOptions != null)
+                {
+                    foreach (var location in selectedOptions)
+                    {
+                        var locationToAdd = new EmployeeLocation { LocationId = int.Parse(location), EmployeeId = employee.Id };
+                        employee.EmployeeLocations.Add(locationToAdd);
+                    }
+                }
+                if (ModelState.IsValid)
+                {
+                    _context.Add(employee);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
+            catch (RetryLimitExceededException)
+            {
+                ModelState.AddModelError("", "Unable to save after multiple attempts.");
+            }
+            catch (DbUpdateException ex)
+            {
+                string err = ex.GetBaseException().Message;
+                if (err.Contains("unique") && err.Contains("ix_employee_username"))
+                {
+                    ModelState.AddModelError("Username", "Unable to save duplicate username.");
+                }
+                else if (err.Contains("unique") && err.Contains("ix_employee_email"))
+                {
+                    ModelState.AddModelError("Username", "Unable to save duplicate email.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unable to save for some reason");
+                }
+            }
+
+            PopulateLocationCheckboxList(employee); // display selected checkbox even if there is validation error.
             PopulateDropdownLists(employee);
             return View(employee);
         }
@@ -101,23 +136,29 @@ namespace mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Username,Email,AccountCreated,FirstName,LastName,Extension,PhoneNumber,Keyword,HireDate,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id != employee.Id)
+            var employeeToUpdate = await _context.Employees.FirstOrDefaultAsync(e => e.Id == id);
+
+            if (employeeToUpdate == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+
+            if (await TryUpdateModelAsync<Employee>(employeeToUpdate, "",
+                    e => e.Username, e => e.Email, e => e.LastName, e => e.FirstName, e => e.AccountCreated, e => e.Extension, 
+                    e => e.PhoneNumber, e => e.HireDate, e => e.Nickname, e => e.EmployeeNumber, e => e.PhotoPath,
+                    e => e.JobTitleId, e => e.DepartmentId, e => e.ManagerId))
             {
                 try
                 {
-                    _context.Update(employee);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EmployeeExists(employee.Id))
+                    if (!EmployeeExists(employeeToUpdate.Id))
                     {
                         return NotFound();
                     }
@@ -126,10 +167,29 @@ namespace mvc.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (RetryLimitExceededException)
+                {
+                    ModelState.AddModelError("", "Unable to save after multiple attempts.");
+                }
+                catch (DbUpdateException ex)
+                {
+                    string err = ex.GetBaseException().Message;
+                    if (err.Contains("unique") && err.Contains("ix_employee_username"))
+                    {
+                        ModelState.AddModelError("Username", "Unable to save duplicate username.");
+                    }
+                    else if (err.Contains("unique") && err.Contains("ix_employee_email"))
+                    {
+                        ModelState.AddModelError("Username", "Unable to save duplicate email.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Unable to save for some reason");
+                    }
+                }
             }
-            PopulateDropdownLists(employee);
-            return View(employee);
+            PopulateDropdownLists(employeeToUpdate);
+            return View(employeeToUpdate);
         }
 
         // GET: Employee/Delete/5
@@ -159,17 +219,44 @@ namespace mvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee != null)
+            var employee = await _context.Employees
+                .Include(e => e.Department)
+                .Include(e => e.JobTitle)
+                .Include(e => e.Manager)
+                .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            try
             {
-                _context.Employees.Remove(employee);
+                if (employee != null)
+                {
+                    _context.Employees.Remove(employee);
+                }
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException ex)
+            {
+                if(ex.GetBaseException().Message.Contains("The deleted statement conflicted with reference constraint"))
+                {
+                    ModelState.AddModelError("", "Unable to delete record. Foreign key issue, I think");
+                }
+                else if(ex.GetBaseException().Message.Contains("The DELETE statement conflicted with the SAME TABLE REFERENCE constraint"))
+                {
+                    ModelState.AddModelError("", "Cannot delete employee who is set as manager. I think");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unable to detele the record. I dont know all the possible errors.");
+                }
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return View(employee);
+
+            
         }
 
-        
+
         private bool EmployeeExists(int id)
         {
             return _context.Employees.Any(e => e.Id == id);
@@ -186,7 +273,7 @@ namespace mvc.Controllers
             var currentSelectedIds = new HashSet<int>(employee.EmployeeLocations.Select(el => el.LocationId));
             var checkBoxes = new List<CheckOptionVM>();
 
-            foreach(var option in allOptions)
+            foreach (var option in allOptions)
             {
                 checkBoxes.Add(new CheckOptionVM
                 {
@@ -200,7 +287,6 @@ namespace mvc.Controllers
 
         private void PopulateDropdownLists(Employee? employee = null)
         {
-
             ViewData["DepartmentId"] = Departmentlist(employee?.DepartmentId);
             ViewData["JobTitleId"] = JobTitleList(employee?.JobTitleId);
             ViewData["ManagerId"] = ManagerList(employee?.ManagerId);
@@ -208,16 +294,16 @@ namespace mvc.Controllers
 
         private SelectList ManagerList(int? managerId)
         {
-            var managerIds = _context.Employees.Select(e => e.ManagerId).Distinct().ToList();
+            var managerIds = _context.Employees.Where(e => e.ManagerId != null).Select(e => e.ManagerId).Distinct().ToList();
             List<Employee> managers = new();
 
-            foreach(var tempId in managerIds)
+            foreach (var tempId in managerIds)
             {
                 var manager = _context.Employees.FirstOrDefault(e => e.Id == tempId);
                 managers.Add(manager);
             }
 
-            return new SelectList( managers.OrderBy(m => m.LastName), "Id", "Summary", managerId);
+            return new SelectList(managers.OrderBy(m => m.LastName), "Id", "Summary", managerId);
         }
 
         private SelectList JobTitleList(int? jobTitleId)

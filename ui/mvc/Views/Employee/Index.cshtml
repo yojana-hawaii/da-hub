@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Domain.directory.Employee>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Employees";
 }
 
 <h1>Index</h1>
@@ -16,10 +16,10 @@
                 @Html.DisplayNameFor(model => model.Summary)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Extension)
+                @Html.DisplayNameFor(model => model.Email)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PhoneFormatted)
+                @Html.DisplayNameFor(model => model.Extension)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.JobTitle)
@@ -29,9 +29,6 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.EmployeeLocations)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Manager)
             </th>
             <th></th>
         </tr>
@@ -44,10 +41,27 @@
                     @Html.DisplayFor(modelItem => item.Summary)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Extension)
+                    @Html.DisplayFor(modelItem => item.Email)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.PhoneFormatted)
+                    @{
+                        if (item.PhoneFormatted != null && item.Extension != null)
+                        {
+                            <a href="#" data-bs-toggle="tooltip" title="@item.PhoneFormatted">@Html.DisplayFor(modelItem => item.Extension)</a>
+                        }
+                        else if (item.PhoneFormatted != null && item.Extension == null)
+                        {
+                            @Html.DisplayFor(modelItem => item.PhoneFormatted)
+                        }
+                        else if (item.PhoneFormatted == null && item.Extension != null)
+                        {
+                            @Html.DisplayFor(modelItem => item.Extension)
+                        }
+                        else
+                        {
+                            @:n/a
+                        }
+                    }
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.JobTitle.JobTitleName)
@@ -62,9 +76,6 @@
                     }
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Manager.Summary)
-                </td>
-                <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                     <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
@@ -73,3 +84,13 @@
         }
     </tbody>
 </table>
+
+@section Scripts {
+    <script type="text/javascript">
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(
+            function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}
