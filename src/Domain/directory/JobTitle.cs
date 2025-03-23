@@ -16,10 +16,11 @@ public class JobTitle : AuditableEntity
 
     [StringLength(500, ErrorMessage = "{0} cannot exceed {1} characters")]
     [Display(Name = "Job Description")]
+    [DataType(DataType.MultilineText)]
     public string? JobTitleDescription { get; set; }
 
 
 
     //Two-way foreign key loop
-    public IEnumerable<Employee> Employees { get; set; } = new HashSet<Employee>();
+    public ICollection<Employee> Employees { get; set; } = new HashSet<Employee>();
 }

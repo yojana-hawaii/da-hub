@@ -73,20 +73,18 @@ namespace Infrastructure.DirectoryMigration
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    AccountCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    AccountCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Extension = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: true),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Keyword = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    HireDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    NickName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HireDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    Nickname = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EmployeeNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     PhotoPath = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     JobTitleId = table.Column<int>(type: "int", nullable: true),
                     DepartmentId = table.Column<int>(type: "int", nullable: true),
-                    LocationId = table.Column<int>(type: "int", nullable: true),
-                    PrimaryManagerId = table.Column<int>(type: "int", nullable: true),
+                    ManagerId = table.Column<int>(type: "int", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     ModifiedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -95,8 +93,8 @@ namespace Infrastructure.DirectoryMigration
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Employees", x => x.Id);
-                    table.UniqueConstraint("ix_employee_email", x => x.Email);
-                    table.UniqueConstraint("ix_employee_username", x => x.Username);
+                    table.UniqueConstraint("AK_Employees_Email", x => x.Email);
+                    table.UniqueConstraint("AK_Employees_Username", x => x.Username);
                     table.ForeignKey(
                         name: "FK_Employees_Departments_DepartmentId",
                         column: x => x.DepartmentId,
@@ -104,8 +102,8 @@ namespace Infrastructure.DirectoryMigration
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Employees_Employees_PrimaryManagerId",
-                        column: x => x.PrimaryManagerId,
+                        name: "FK_Employees_Employees_ManagerId",
+                        column: x => x.ManagerId,
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -113,12 +111,6 @@ namespace Infrastructure.DirectoryMigration
                         name: "FK_Employees_JobTitles_JobTitleId",
                         column: x => x.JobTitleId,
                         principalTable: "JobTitles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Employees_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -157,16 +149,44 @@ namespace Infrastructure.DirectoryMigration
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "EmployeeeLocations",
+                columns: table => new
+                {
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    LocationId = table.Column<int>(type: "int", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeeeLocations", x => new { x.EmployeeId, x.LocationId });
+                    table.ForeignKey(
+                        name: "FK_EmployeeeLocations_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_EmployeeeLocations_Locations_LocationId",
+                        column: x => x.LocationId,
+                        principalTable: "Locations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "ix_department_name",
+                name: "IX_Departments_DepartmentName",
                 table: "Departments",
                 column: "DepartmentName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_employee_keyword",
-                table: "Employees",
-                column: "Keyword");
+                name: "IX_EmployeeeLocations_LocationId",
+                table: "EmployeeeLocations",
+                column: "LocationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Employees_DepartmentId",
@@ -179,20 +199,9 @@ namespace Infrastructure.DirectoryMigration
                 column: "JobTitleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Employees_LocationId",
+                name: "IX_Employees_ManagerId",
                 table: "Employees",
-                column: "LocationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Employees_PrimaryManagerId",
-                table: "Employees",
-                column: "PrimaryManagerId");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_fax_number",
-                table: "Faxes",
-                column: "FaxNumber",
-                unique: true);
+                column: "ManagerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Faxes_DepartmentId",
@@ -200,18 +209,24 @@ namespace Infrastructure.DirectoryMigration
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Faxes_FaxNumber",
+                table: "Faxes",
+                column: "FaxNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Faxes_LocationId",
                 table: "Faxes",
                 column: "LocationId");
 
             migrationBuilder.CreateIndex(
-                name: "ix_jobTitle_name",
+                name: "IX_JobTitles_JobTitleName",
                 table: "JobTitles",
                 column: "JobTitleName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_location",
+                name: "IX_Locations_LocationName_ComputedSubLocationForUniqueness",
                 table: "Locations",
                 columns: new[] { "LocationName", "ComputedSubLocationForUniqueness" },
                 unique: true);
@@ -221,19 +236,22 @@ namespace Infrastructure.DirectoryMigration
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Employees");
+                name: "EmployeeeLocations");
 
             migrationBuilder.DropTable(
                 name: "Faxes");
 
             migrationBuilder.DropTable(
-                name: "JobTitles");
+                name: "Employees");
+
+            migrationBuilder.DropTable(
+                name: "Locations");
 
             migrationBuilder.DropTable(
                 name: "Departments");
 
             migrationBuilder.DropTable(
-                name: "Locations");
+                name: "JobTitles");
         }
     }
 }

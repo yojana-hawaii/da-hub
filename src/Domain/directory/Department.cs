@@ -16,6 +16,6 @@ public class Department : AuditableEntity
 
 
 
-    public IEnumerable<Employee> Employees { get; set; } = new HashSet<Employee>();
-    public IEnumerable<Fax> Faxes { get; set; } = new HashSet<Fax>();
+    public ICollection<Employee> Employees { get; set; } = new HashSet<Employee>();
+    public ICollection<Fax> Faxes { get; set; } = new HashSet<Fax>();
 }

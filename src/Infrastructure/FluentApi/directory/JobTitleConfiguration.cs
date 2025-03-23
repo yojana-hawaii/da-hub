@@ -10,7 +10,6 @@ internal class JobTitleConfiguration : IEntityTypeConfiguration<JobTitle>
     {
         builder
             .HasIndex(h => h.JobTitleName)
-            .IsUnique()
-            .HasDatabaseName("ix_jobTitle_name");
+            .IsUnique();
     }
 }

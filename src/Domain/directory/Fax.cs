@@ -43,6 +43,8 @@ public class Fax : AuditableEntity, IValidatableObject
     public int? DepartmentId { get; set; }
     public Department? Department { get; set; }
 
+
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if(IsForwarded)

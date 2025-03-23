@@ -10,7 +10,6 @@ internal class DepartmentConfiguration : IEntityTypeConfiguration<Department>
     {
         builder
             .HasIndex(c => new { c.DepartmentName })
-            .IsUnique()
-            .HasDatabaseName("ix_department_name");
+            .IsUnique();
     }
 }

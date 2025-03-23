@@ -14,12 +14,12 @@ public class EmployeeLocationConfiguration : IEntityTypeConfiguration<EmployeeLo
             .HasOne(el => el.Location)
             .WithMany(el => el.EmployeeLocations)
             .HasForeignKey(el => el.LocationId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasOne(el => el.Employee)
             .WithMany(el => el.EmployeeLocations)
             .HasForeignKey(el => el.EmployeeId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

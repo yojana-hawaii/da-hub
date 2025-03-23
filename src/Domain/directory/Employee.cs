@@ -4,7 +4,7 @@ using Domain.extension;
 
 namespace Domain.directory;
 
-public class Employee : AuditableEntity
+public class Employee : AuditableEntity, IValidatableObject
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
@@ -27,7 +27,17 @@ public class Employee : AuditableEntity
         }
     }
     [Display(Name = "Phone")]
-    public string PhoneFormatted => "(" + PhoneNumber?[..3] + ") " + PhoneNumber?.Substring(3, 3) + "-" + PhoneNumber?[6..];
+    public string? PhoneFormatted
+    {
+        get
+        {
+            if(PhoneNumber != null)
+            {
+                return "(" + PhoneNumber?[..3] + ") " + PhoneNumber?.Substring(3, 3) + "-" + PhoneNumber?[6..];
+            }
+            return PhoneNumber;
+        }
+    }
 
     [Display(Name = "Created")]
     public DateOnly AccountCreatedDate
@@ -45,7 +55,6 @@ public class Employee : AuditableEntity
     public string Username { get; set; } = "";
 
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
-    [DataType(DataType.EmailAddress)]
     [Required(ErrorMessage = "Cannot leave {0} blank")]
     public string Email { get; set; } = "";
 
@@ -74,7 +83,7 @@ public class Employee : AuditableEntity
 
     //in the future -DateTime not nullable from fluent API
     [Display(Name = "Hire Date")]
-    public DateTime? HireDate { get; set; }
+    public DateOnly? HireDate { get; set; }
     public string? Nickname { get; set; }
     [MaxLength(20)]
     [Display(Name = "Employee Number")]
@@ -95,14 +104,32 @@ public class Employee : AuditableEntity
     [Display(Name = "Locations")]
     public ICollection<EmployeeLocation> EmployeeLocations { get; set; } = new HashSet<EmployeeLocation>();
 
+
     //Self-Referencing foreign key
     public int? ManagerId { get; set; }
     public Employee? Manager { get; set; }
 
 
-
-
-    //Two-way foreign key loop
+    //Two-way self referencing foreign key loop
     [Display(Name = "Direct Reports")]
-    public IEnumerable<Employee> PrimaryStaff { get; set; } = new HashSet<Employee>();
+    public ICollection<Employee> PrimaryStaff { get; set; } = new HashSet<Employee>();
+
+
+    //IValidation
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        DateTime today = DateTime.Now;
+        DateOnly dateOnly = DateOnly.FromDateTime(AccountCreated);
+
+        if(AccountCreated > today)
+        {
+            yield return new ValidationResult("Hire date cannot be future");
+        }
+
+        if (dateOnly.CompareTo(HireDate) < 0)
+        {
+            yield return new ValidationResult("Account cannot be created before hire date");
+        }
+        
+    }
 }

@@ -13,8 +13,7 @@ internal class LocationConfiguration : IEntityTypeConfiguration<Location>
            .HasComputedColumnSql("isnull(SubLocation, 'NULL-MARKER')");
         builder
             .HasIndex(i => new { i.LocationName, i.ComputedSubLocationForUniqueness})
-            .IsUnique()
-            .HasDatabaseName("ix_location");
+            .IsUnique();
       
     }
 }

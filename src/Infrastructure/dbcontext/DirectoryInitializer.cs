@@ -79,6 +79,7 @@ public static class DirectoryInitializer
                 if (!_context.Employees.Any())
                 {
                     SeedEmployee(_context, rnd);
+                    SeedManager(_context, rnd);
                 }
 
                 if (!_context.EmployeeeLocations.Any())
@@ -94,19 +95,26 @@ public static class DirectoryInitializer
         #endregion
     }
 
+
+
     private static void SeedEmployeeLocation(DirectoryContext context, Random rnd)
     {
         //Ids could be deleted over time. Need to select what is available
         int[] empIds = context.Employees.Select(s => s.Id).ToArray();
         var empCount = empIds.Length;
+        var noLoc = rnd.Next(1, empCount);
 
         int[] locIds = context.Locations.Select(s => s.Id).ToArray();
         var locCount = locIds.Length;
 
-        foreach( var id in empIds)
+        foreach (var id in empIds)
         {
+            if(id % noLoc == 0)
+            {
+                continue;
+            }
             int howManyLocations = rnd.Next(1, 5);
-            for(int i =1; i <= howManyLocations; i++)
+            for (int i = 1; i <= howManyLocations; i++)
             {
                 int locId = rnd.Next(1, locCount + 1);
                 EmployeeLocation empLoc = new EmployeeLocation()
@@ -126,6 +134,7 @@ public static class DirectoryInitializer
             }
         }
 
+
         try
         {
             context.SaveChanges();
@@ -135,7 +144,28 @@ public static class DirectoryInitializer
             Debug.WriteLine(ex.GetBaseException().Message);
         }
     }
+    
+    private static void SeedManager(DirectoryContext context, Random rnd)
+    {
 
+        var ceo = 1; // rnd.Next(1, context.Employees.Count());
+
+        //add manager , random one with no manager
+        foreach (var emp in context.Employees)
+        {
+            if(emp.Id == ceo) { continue; }
+            emp.ManagerId = rnd.Next(1, 5);
+        }
+        try
+        {
+            context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.GetBaseException().Message);
+        }
+    }
+   
     private static void SeedEmployee(DirectoryContext context, Random rnd)
     {
         var firstnames = new string[] { "Trent", "Virgil", "Abrille", "Diamond", "Aurelia", "Harvey", "Dara", "Della", "Everest", "Juniper", "Kai", "Kiara", "Napheesa", "Lorraine", "Rafael" };
@@ -153,7 +183,18 @@ public static class DirectoryInitializer
         {
             var first = firstnames[rnd.Next(0, firstCount)];
             var last = lastnames[rnd.Next(0, lastCount)];
-            var extension = rnd.Next(500, 599);
+            var ext = rnd.Next(500, 599);
+
+            var extension = $"{ext}";
+            var phone = $"8002158{extension}";
+            var job = rnd.Next(1, jobCount + 1);
+            var dept = rnd.Next(1, deptCount + 1);
+
+            if (i % 7 == 0) { phone = null; }
+            if (i % 8 == 0) { extension = null; }
+            if (i % 9 == 0) { phone = null; extension = null; }
+            if (job == 1) { job = 0; }
+            if (dept == 1) { dept = 0; }
 
             var emp = new Employee
             {
@@ -161,12 +202,13 @@ public static class DirectoryInitializer
                 LastName = last,
                 Username = $"{first}.{last}",
                 Email = $"{first}.{last}@email.com",
-                Extension = $"{extension}",
-                PhoneNumber = $"8002158{extension}",
-                JobTitleId = rnd.Next(1, jobCount + 1),
-                DepartmentId = rnd.Next(1, deptCount + 1)
+                Extension = extension,
+                PhoneNumber = phone,
+                JobTitleId = job == 0 ? null : job,
+                DepartmentId = dept == 0 ? null : dept
             };
 
+            //try add, catch exception remove
             try
             {
                 context.Employees.Add(emp);
@@ -177,6 +219,7 @@ public static class DirectoryInitializer
                 Debug.WriteLine(ex.GetBaseException().Message);
             }
         }
+        //save added employees
         try
         {
             context.SaveChanges();
@@ -186,18 +229,6 @@ public static class DirectoryInitializer
             Debug.WriteLine(ex.GetBaseException().Message);
         }
 
-        foreach (var emp in context.Employees)
-        {
-            emp.ManagerId = rnd.Next(1, 5);
-        }
-        try
-        {
-            context.SaveChanges();
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex.GetBaseException().Message);
-        }
     }
 
     private static void SeedFax(DirectoryContext context, Random random)

@@ -52,10 +52,9 @@ namespace Infrastructure.DirectoryMigration
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentName")
-                        .IsUnique()
-                        .HasDatabaseName("ix_department_name");
+                        .IsUnique();
 
-                    b.ToTable("Departments", (string)null);
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("Domain.directory.Employee", b =>
@@ -97,8 +96,8 @@ namespace Infrastructure.DirectoryMigration
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("HireDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly?>("HireDate")
+                        .HasColumnType("date");
 
                     b.Property<int?>("JobTitleId")
                         .HasColumnType("int");
@@ -134,11 +133,9 @@ namespace Infrastructure.DirectoryMigration
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("Email")
-                        .HasName("ix_employee_email");
+                    b.HasAlternateKey("Email");
 
-                    b.HasAlternateKey("Username")
-                        .HasName("ix_employee_username");
+                    b.HasAlternateKey("Username");
 
                     b.HasIndex("DepartmentId");
 
@@ -146,7 +143,7 @@ namespace Infrastructure.DirectoryMigration
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("Employees", (string)null);
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("Domain.directory.EmployeeLocation", b =>
@@ -175,7 +172,7 @@ namespace Infrastructure.DirectoryMigration
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("EmployeeeLocations", (string)null);
+                    b.ToTable("EmployeeeLocations");
                 });
 
             modelBuilder.Entity("Domain.directory.Fax", b =>
@@ -226,12 +223,11 @@ namespace Infrastructure.DirectoryMigration
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("FaxNumber")
-                        .IsUnique()
-                        .HasDatabaseName("ix_fax_number");
+                        .IsUnique();
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("Faxes", (string)null);
+                    b.ToTable("Faxes");
                 });
 
             modelBuilder.Entity("Domain.directory.JobTitle", b =>
@@ -268,10 +264,9 @@ namespace Infrastructure.DirectoryMigration
                     b.HasKey("Id");
 
                     b.HasIndex("JobTitleName")
-                        .IsUnique()
-                        .HasDatabaseName("ix_jobTitle_name");
+                        .IsUnique();
 
-                    b.ToTable("JobTitles", (string)null);
+                    b.ToTable("JobTitles");
                 });
 
             modelBuilder.Entity("Domain.directory.Location", b =>
@@ -314,10 +309,9 @@ namespace Infrastructure.DirectoryMigration
                     b.HasKey("Id");
 
                     b.HasIndex("LocationName", "ComputedSubLocationForUniqueness")
-                        .IsUnique()
-                        .HasDatabaseName("ix_location");
+                        .IsUnique();
 
-                    b.ToTable("Locations", (string)null);
+                    b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("Domain.directory.Employee", b =>
@@ -349,13 +343,13 @@ namespace Infrastructure.DirectoryMigration
                     b.HasOne("Domain.directory.Employee", "Employee")
                         .WithMany("EmployeeLocations")
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.directory.Location", "Location")
                         .WithMany("EmployeeLocations")
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Employee");

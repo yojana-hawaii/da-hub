@@ -37,5 +37,5 @@ public class Location : AuditableEntity
     public ICollection<EmployeeLocation> EmployeeLocations { get; set; } = new HashSet<EmployeeLocation>();
 
     //one to many foreign key
-    public IEnumerable<Fax> Faxes { get; set; } = new HashSet<Fax>();
+    public ICollection<Fax> Faxes { get; set; } = new HashSet<Fax>();
 }
