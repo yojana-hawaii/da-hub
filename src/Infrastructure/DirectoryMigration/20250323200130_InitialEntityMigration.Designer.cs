@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.DirectoryMigration
 {
     [DbContext(typeof(DirectoryContext))]
-    [Migration("20250323041952_DirectoryEntity")]
-    partial class DirectoryEntity
+    [Migration("20250323200130_InitialEntityMigration")]
+    partial class InitialEntityMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -352,7 +352,7 @@ namespace Infrastructure.DirectoryMigration
                     b.HasOne("Domain.directory.Location", "Location")
                         .WithMany("EmployeeLocations")
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Employee");

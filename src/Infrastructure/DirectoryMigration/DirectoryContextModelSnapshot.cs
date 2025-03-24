@@ -349,7 +349,7 @@ namespace Infrastructure.DirectoryMigration
                     b.HasOne("Domain.directory.Location", "Location")
                         .WithMany("EmployeeLocations")
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Employee");
