@@ -70,9 +70,32 @@
                     @Html.DisplayFor(modelItem => item.Department.DepartmentName)
                 </td>
                 <td>
-                    @foreach (var loc in item.EmployeeLocations)
-                    {
-                        @loc.Location.Summary <br />
+                    @{
+                        var locCount = item.EmployeeLocations.Count;
+                        if (locCount > 0)
+                        {
+                            var firstLocation = item.EmployeeLocations.FirstOrDefault().Location.Summary;
+                            if (locCount > 1)
+                            {
+                                var locStr = "";//Html string of specialty names separated by <br /> tags
+                                var locList = item.EmployeeLocations.ToList();
+
+                                for (var i = 1; i < locCount; i++)
+                                {
+                                    locStr += locList[i].Location.Summary + "<br />";
+                                }
+                                <a class="" role="button" data-bs-toggle="collapse" href="#collapseLocation@(item.Id)" aria-expanded="false" aria-controls="collapseLocation@(item.Id)">
+                                    @firstLocation <span class="badge bg-info">@locCount</span>
+                                </a>
+                                <div class="collapse" id="collapseLocation@(item.Id)">
+                                    @Html.Raw(locStr)
+                                </div>
+                            }
+                            else
+                            {
+                                @firstLocation
+                            }
+                        }
                     }
                 </td>
                 <td>
