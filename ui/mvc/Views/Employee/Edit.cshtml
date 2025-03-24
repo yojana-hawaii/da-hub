@@ -1,4 +1,5 @@
 ﻿@model Domain.directory.Employee
+@using mvc.ViewModel
 
 @{
     ViewData["Title"] = "Edit Employee";
@@ -70,24 +71,55 @@
             </div>
             <div class="form-group">
                 <label asp-for="JobTitle" class="control-label"></label>
-                <select asp-for="JobTitleId" class="form-control" asp-items="ViewBag.JobTitleId">
+                <select asp-for="JobTitleId" class="form-control" asp-items="ViewBag.JobTitleDropdown">
                     <option value=""></option>
                 </select>
                 <span asp-validation-for="JobTitleId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Department" class="control-label"></label>
-                <select asp-for="DepartmentId" class="form-control" asp-items="ViewBag.DepartmentId">
+                <select asp-for="DepartmentId" class="form-control" asp-items="ViewBag.DepartmentDropdown">
                     <option value=""></option>
                 </select>
                 <span asp-validation-for="DepartmentId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Manager" class="control-label"></label>
-                <select asp-for="ManagerId" class="form-control" asp-items="ViewBag.ManagerId">
+                <select asp-for="ManagerId" class="form-control" asp-items="ViewBag.ManagerDropdown">
                     <option value=""></option>
                 </select>
                 <span asp-validation-for="ManagerId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EmployeeLocations" class="control-label"></label>
+                <div class="m-2">
+                    <table>
+                        <tr>
+                            @{
+                                int cnt = 0;
+                                List<CheckOptionVM> checkboxes = ViewBag.LocationMultiSelectCheckbox;
+                                
+                                foreach( var checkbox in checkboxes)
+                                {
+                                    // Two in each row
+                                    if(cnt++ % 2 == 0)
+                                    {
+                                        @:</tr><tr>
+                                    }
+                                    @:<td>
+                                    
+                                        <input type="checkbox"
+                                                name="selectedOptions"
+                                                value="@checkbox.Id"
+                                                @(Html.Raw(checkbox.IsSelected ? "checked=\"checked\"" : "")) />
+                                        @checkbox.DisplayText @:&nbsp;&nbsp;
+                                    @:</td>
+                                }
+                                @:</tr>
+                            }
+                        </tr>
+                    </table>
+                </div>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

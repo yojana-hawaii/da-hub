@@ -56,10 +56,11 @@ namespace mvc.Controllers
         public IActionResult Create()
         {
             Employee employee = new();
-            PopulateLocationCheckboxList(employee);
+            PopulateLocationMultiselectCheckbox(employee);
             PopulateDropdownLists();
             return View(employee);
         }
+
 
         // POST: Employee/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -67,7 +68,7 @@ namespace mvc.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Username,Email,FirstName,LastName,Extension,PhoneNumber," +
-                            "NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee, string[] selectedOptions)
+                            "AccountCreated,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee, string[] selectedOptions)
         {
             try
             {
@@ -106,12 +107,10 @@ namespace mvc.Controllers
                     ModelState.AddModelError("", "Unable to save for some reason");
                 }
             }
-
-            PopulateLocationCheckboxList(employee); // display selected checkbox even if there is validation error.
+            PopulateLocationMultiselectCheckbox(employee); // display selected checkbox even if there is validation error.
             PopulateDropdownLists(employee);
             return View(employee);
         }
-
 
 
         // GET: Employee/Edit/5
@@ -122,12 +121,18 @@ namespace mvc.Controllers
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _context.Employees
+                .Include(e => e.Department)
+                .Include(e => e.JobTitle)
+                .Include(e => e.Manager)
+                .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
+                .FirstOrDefaultAsync(e => e.Id == id);
             if (employee == null)
             {
                 return NotFound();
             }
             PopulateDropdownLists(employee);
+            PopulateLocationMultiselectCheckbox(employee);
             return View(employee);
         }
 
@@ -136,15 +141,22 @@ namespace mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, string[] selectedOptions)
         {
-            var employeeToUpdate = await _context.Employees.FirstOrDefaultAsync(e => e.Id == id);
+            var employeeToUpdate = await _context.Employees
+                .Include(e => e.Department)
+                .Include(e => e.JobTitle)
+                .Include(e => e.Manager)
+                .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
+                .FirstOrDefaultAsync(e => e.Id == id);
 
             if (employeeToUpdate == null)
             {
                 return NotFound();
             }
 
+
+            UpdateEmployeeLocationListboxCheckbox(selectedOptions, employeeToUpdate);
 
             if (await TryUpdateModelAsync<Employee>(employeeToUpdate, "",
                     e => e.Username, e => e.Email, e => e.LastName, e => e.FirstName, e => e.AccountCreated, e => e.Extension, 
@@ -154,7 +166,8 @@ namespace mvc.Controllers
                 try
                 {
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    //display change detail instead of going back to index
+                    return RedirectToAction("Details", new {employeeToUpdate.Id});
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -188,6 +201,7 @@ namespace mvc.Controllers
                     }
                 }
             }
+            PopulateLocationMultiselectCheckbox(employeeToUpdate);
             PopulateDropdownLists(employeeToUpdate);
             return View(employeeToUpdate);
         }
@@ -205,7 +219,7 @@ namespace mvc.Controllers
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id); //FindAsync faster but only works with one entity.
             if (employee == null)
             {
                 return NotFound();
@@ -262,12 +276,91 @@ namespace mvc.Controllers
             return _context.Employees.Any(e => e.Id == id);
         }
 
+
+
+
+        //UPDATE FOR LIST-BOX AND CHECK-BOX
+        private void UpdateEmployeeLocationListboxCheckbox(string[] selectedOptions, Employee employeeToUpdate)
+        {
+            if(selectedOptions == null)
+            {
+                employeeToUpdate.EmployeeLocations = new List<EmployeeLocation>();
+                return;
+            }
+
+            var _newOptions = new HashSet<string>(selectedOptions);
+            var _currentOptions = new HashSet<int>(employeeToUpdate.EmployeeLocations.Select(el => el.LocationId));
+
+            foreach(var loc in _context.Locations)
+            {
+                if (_newOptions.Contains(loc.Id.ToString())) //already selected
+                {
+                    if (!_currentOptions.Contains(loc.Id)) //selected but not Employee collection - Add it
+                    {
+                        employeeToUpdate.EmployeeLocations.Add(new EmployeeLocation
+                        {
+                            LocationId = loc.Id,
+                            EmployeeId = employeeToUpdate.Id
+                        });
+                    }
+                }
+                else //not selected
+                {
+                    if (_currentOptions.Contains(loc.Id)) //not selected but in Employee Colection - Remove it
+                    {
+                        EmployeeLocation? locationToRemove = employeeToUpdate.EmployeeLocations.FirstOrDefault( e=> e.LocationId == loc.Id);
+                        if (locationToRemove != null)
+                        {
+                            _context.Remove(locationToRemove);
+                        }
+                    }
+                }
+            }
+        }
+
+        //LIST-BOXES
+        private void PopulateLocationListBox(Employee employee)
+        {
+            var allOptions = _context.Locations;
+            var currentOptions = new HashSet<int>(employee.EmployeeLocations.Select(e => e.LocationId));
+
+            var selected = new List<ListOptionVM>();
+            var available = new List<ListOptionVM>();
+
+            foreach(var loc in allOptions)
+            {
+                if(currentOptions.Contains(loc.Id))
+                {
+                    selected.Add(new ListOptionVM
+                    {
+                        Id = loc.Id,
+                        DisplayText = loc.Summary
+                    });
+                }
+                else
+                {
+                    available.Add(new ListOptionVM
+                    {
+                        Id = loc.Id,
+                        DisplayText = loc.Summary
+                    });
+                }
+            }
+
+            ViewData["LocationListBoxSelectedOption"] = new MultiSelectList(selected.OrderBy(l => l.DisplayText), "Id", "DisplayText");
+            ViewData["LocationListBoxAvailableOption"] = new MultiSelectList(available.OrderBy(l => l.DisplayText), "Id", "DisplayText");
+        }
+
+
+
+        //CHECK-BOXES
+       
         /// <summary>
         /// good for create and delete. Edit needs a little more
         /// allOptions has all locations, IsSelected is true only if current employee has locationId in their intersection table
         /// </summary>
         /// <param name="employee"></param>
-        private void PopulateLocationCheckboxList(Employee employee)
+        private void PopulateLocationMultiselectCheckbox(Employee employee)
         {
             var allOptions = _context.Locations;
             var currentSelectedIds = new HashSet<int>(employee.EmployeeLocations.Select(el => el.LocationId));
@@ -282,14 +375,17 @@ namespace mvc.Controllers
                     IsSelected = currentSelectedIds.Contains(option.Id)
                 });
             }
-            ViewData["LocationOptions"] = checkBoxes;
+            ViewData["LocationMultiSelectCheckbox"] = checkBoxes;
         }
 
+
+
+        //DROPDOWN LISTS
         private void PopulateDropdownLists(Employee? employee = null)
         {
-            ViewData["DepartmentId"] = Departmentlist(employee?.DepartmentId);
-            ViewData["JobTitleId"] = JobTitleList(employee?.JobTitleId);
-            ViewData["ManagerId"] = ManagerList(employee?.ManagerId);
+            ViewData["DepartmentDropdown"] = Departmentlist(employee?.DepartmentId);
+            ViewData["JobTitleDropdown"] = JobTitleList(employee?.JobTitleId);
+            ViewData["ManagerDropdown"] = ManagerList(employee?.ManagerId);
         }
 
         private SelectList ManagerList(int? managerId)
