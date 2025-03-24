@@ -54,35 +54,9 @@ public class LocationController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("LocationName,SubLocation")] Location location)
     {
-        try
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(location);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-        }
-        catch (DbUpdateException dex)
-        {
-            string err = dex.GetBaseException().Message;
-            if (err.Contains("unique") && err.Contains("ix_location"))
-            {
-                ModelState.AddModelError("LocationName", "Unable to save duplicate location / sub-location pair.");
-            }
-            else
-            {
-                ModelState.AddModelError("", "Unable to save. Some problem I did not thing about.");
-            }
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-        return View(location);
+        _context.Add(location);
+        return await TryCatchSaveChanges(location);
     }
-
-
 
 
     // GET: Location/Edit/5
@@ -116,34 +90,7 @@ public class LocationController : Controller
 
         if (await TryUpdateModelAsync<Location>(locToUpdate, "", l => l.LocationName, l => l.SubLocation))
         {
-            try
-            {
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!LocationExists(locToUpdate.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            catch (DbUpdateException dex)
-            {
-                string err = dex.GetBaseException().Message;
-                if (err.Contains("unique") && err.Contains("ix_location"))
-                {
-                    ModelState.AddModelError("LocationName", "Unable to save duplicate location / sub-location pair.");
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Unable to save. Some problem I did not thing about.");
-                }
-            }
+            return await TryCatchSaveChanges(locToUpdate);
         }
         return View(locToUpdate);
     }
@@ -175,26 +122,10 @@ public class LocationController : Controller
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var location = await _context.Locations.FindAsync(id);
-        try
+        if (location != null)
         {
-            if (location != null)
-            {
-                _context.Locations.Remove(location);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-        catch (DbUpdateException dex)
-        {
-            if (dex.GetBaseException().Message.Contains("The DELETE statement conflicted with the REFERENCE constraint"))
-            {
-                ModelState.AddModelError("", "Unable to delete record. Location already used");
-            }
-            else
-            {
-                ModelState.AddModelError("", "Unable to delete record. Cant think of a reason this could happen");
-            }
+            _context.Locations.Remove(location);
+            return await TryCatchSaveChanges(location);
         }
         return View(location);
     }
@@ -206,4 +137,51 @@ public class LocationController : Controller
     {
         return _context.Locations.Any(e => e.Id == id);
     }
+
+    private async Task<IActionResult> TryCatchSaveChanges(Location location)
+    {
+        try
+        {
+            if (ModelState.IsValid)
+            {
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            string errMessage = ex.GetBaseException().Message;
+            if (!LocationExists(location.Id))
+            {
+                return NotFound();
+            }
+            else
+            {
+                ModelState.AddModelError("", errMessage);
+            }
+        }
+        catch (DbUpdateException ex)
+        {
+            string errMessage = ex.GetBaseException().Message;
+            if (errMessage.Contains("unique") && errMessage.Contains("IX_Locations_LocationName"))
+            {
+                ModelState.AddModelError("LocationName", "Unable to save duplicate location.");
+            }
+            else if (errMessage.Contains("The DELETE statement conflicted with the REFERENCE constraint"))
+            {
+                ModelState.AddModelError("", "Unable to delete record. Location already used");
+            }
+            else
+            {
+                ModelState.AddModelError("", errMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            string errMessage = ex.GetBaseException().Message;
+            ModelState.AddModelError("", errMessage);
+        }
+        return View(location);
+    }
+
 }
