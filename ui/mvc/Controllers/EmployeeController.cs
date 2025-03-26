@@ -132,7 +132,7 @@ namespace mvc.Controllers
                 return NotFound();
             }
             PopulateDropdownLists(employee);
-            PopulateLocationMultiselectCheckbox(employee);
+            PopulateLocationListBox(employee);
             return View(employee);
         }
 
@@ -201,7 +201,7 @@ namespace mvc.Controllers
                     }
                 }
             }
-            PopulateLocationMultiselectCheckbox(employeeToUpdate);
+            PopulateLocationListBox(employeeToUpdate);
             PopulateDropdownLists(employeeToUpdate);
             return View(employeeToUpdate);
         }
