@@ -1,0 +1,39 @@
+﻿@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled = disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled = disabled" : "";
+}
+
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center pagination-sm" style="margin:20px 0">
+        <li class="page-item">
+            <button type="submit" name="page" class="btn page-link" @prevDisabled value="1">
+                <span aria-hidden="true">&larr;</span>&nbsp;First
+            </button>
+        </li>
+
+        <li class="page-item">
+            <button type="submit" name="page" class="btn page-link" @prevDisabled value="@(Model.PageIndex - 1)">
+                <span aria-hidden="true">&larr;</span>&nbsp;Previous
+            </button>
+        </li>
+
+        <li class="page-item active">
+            <button type="button" disabled="disabled" class="btn page-link">
+                Page @Model.PageIndex of @Model.TotalPages
+            </button>
+        </li>
+
+        <li class="page-item">
+            <button type="submit" name="page" class="btn page-link" @nextDisabled value="@(Model.PageIndex + 1)">
+                Next&nbsp;<span aria-hidden="true">&rarr;</span>
+            </button>
+        </li>
+
+        <li class="page-item">
+            <button type="submit" name="page" class="btn page-link" @nextDisabled value="@(Model.TotalPages)">
+                Last&nbsp;<span aria-hidden="true">&rarr;</span>
+            </button>
+        </li>
+    </ul>
+
+</nav>

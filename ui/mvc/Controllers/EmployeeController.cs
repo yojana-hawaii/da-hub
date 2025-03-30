@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using mvc.Utilities;
 using mvc.ViewModel;
 
 namespace mvc.Controllers
@@ -20,9 +21,10 @@ namespace mvc.Controllers
         // GET: Employee
         public async Task<IActionResult> Index(string? searchString,
                                             int? JobTitleDropdown, int? DepartmentDropdown, int? LocationId, int? ManagerDropdown,
+                                            int? page,
                                             string? actionButton, string sortDirection = "asc", string sortField = "Employee")
         {
-           
+
 
             PopulateDropdownLists();
 
@@ -41,8 +43,10 @@ namespace mvc.Controllers
 
             //sumbit button named actionButton used for filter & sorting. Value is different and that is what comes in 
             string[] sortOptions = new[] { "Employee", "Email", "Phone", "Job Title", "Department" }; //names have to match table headeer to sort by
+
             if (!string.IsNullOrEmpty(actionButton)) // if form was submitted not new  page open
             {
+                page = 1; //reset the page if any sorting us used
                 if (sortOptions.Contains(actionButton)) //filter would be actionButton for filter/search but not in sort option define at the top
                 {
                     if (actionButton == sortField) // reverse the order if same field
@@ -53,9 +57,9 @@ namespace mvc.Controllers
                 }
             }
 
-            employees = SortEmployees(employees, sortField, sortDirection);
+            var paginatedEmployees = await SortEmployeesAsync(employees, sortField, sortDirection, page);
 
-            return View(await employees.ToListAsync()); // IQuerable executed when ToList is called
+            return View(paginatedEmployees); // IQuerable executed when ToList is called
         }
 
         private IQueryable<Employee> FilterEmployee(string? searchString, int? JobTitleDropdown, int? DepartmentDropdown, int? LocationId, int? ManagerDropdown, IQueryable<Employee> employees)
@@ -74,7 +78,7 @@ namespace mvc.Controllers
                 employees = employees.Where(e => e.JobTitleId == JobTitleDropdown);
                 numberFilters++;
             }
-            if(ManagerDropdown.HasValue)
+            if (ManagerDropdown.HasValue)
             {
                 employees = employees.Where(e => e.ManagerId == ManagerDropdown);
             }
@@ -106,21 +110,21 @@ namespace mvc.Controllers
                 ViewData["showFilter"] = " show ";
             }
 
-            
+
             return employees;
         }
 
-        private IQueryable<Employee> SortEmployees(IQueryable<Employee> employees, string sortField, string sortDirection)
+        private async Task<PaginatedList<Employee>> SortEmployeesAsync(IQueryable<Employee> employees, string sortField, string sortDirection, int? page)
         {
-            if(sortField == "Employee")
+            if (sortField == "Employee")
             {
-                if(sortDirection == "desc")
+                if (sortDirection == "desc")
                 {
                     employees = employees.OrderByDescending(e => e.LastName).ThenByDescending(e => e.FirstName);
                 }
                 else
                 {
-                    employees = employees.OrderBy(e => e.LastName).ThenBy( e => e.FirstName);
+                    employees = employees.OrderBy(e => e.LastName).ThenBy(e => e.FirstName);
                 }
             }
             else if (sortField == "Email")
@@ -172,9 +176,17 @@ namespace mvc.Controllers
                 employees = employees.OrderByDescending(e => e.LastName).ThenByDescending(e => e.FirstName);
             }
 
+            //hidden field in Index view to track current sorting, just incase user clicks on same sorting, do the reverse. asc then desc then asc ...
             ViewData["sortField"] = sortField;
             ViewData["sortDirection"] = sortDirection;
-            return employees;
+
+
+            //pagination
+            int pageSize = 10; // 10 employee per page
+            var pagedData = await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), page ?? 1, pageSize);
+
+
+            return pagedData;
         }
 
         // GET: Employee/Details/5
