@@ -19,17 +19,24 @@
                     <div class="form-group col-md-4">
                         <label class="control-label">Select By Location</label>
                         @* html tag helper, even though old,  becuase it remembers last selection. *@
-                        @Html.DropDownList("JobTitleDropdown", null, "All Job Title", htmlAttributes: new { @class = "form-control" })
+                        @Html.DropDownList("JobTitleDropdown", null, "All Job Titles", htmlAttributes: new { @class = "form-control" })
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-6">
                         <label class="control-label">Select By Department</label>
-                        @Html.DropDownList("DepartmentDropdown", null, "All Department", htmlAttributes: new { @class = "form-control" })
+                        @Html.DropDownList("DepartmentDropdown", null, "All Departments", htmlAttributes: new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label class="control-label">Select By Department</label>
+                        @Html.DropDownList("LocationId", null, "All Locations", htmlAttributes: new { @class = "form-control" })
                     </div>
                     <div class="form-group col-md-4">
-                        <label class="control-label">Search by name</label>
+                        <label class="control-label">Search by Name or Number</label>
                         @Html.TextBox("SearchString", null, new { @class = "form-control" })
                     </div>
-
+                </div>
+                <div class="row">
                     <div class="form-group col-md-4 align-self-end">
                         <input type="submit" name="actionButton" value="Filter" class="btn btn-outline-primary" />
                         <a asp-action="Index" class="btn btn-outline-dark">Clear</a>

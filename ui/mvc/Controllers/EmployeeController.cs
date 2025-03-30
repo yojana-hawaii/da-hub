@@ -18,13 +18,16 @@ namespace mvc.Controllers
         }
 
         // GET: Employee
-        public async Task<IActionResult> Index(string? searchString, int? JobTitleDropdown, int? DepartmentDropdown)
+        public async Task<IActionResult> Index(string? searchString, int? JobTitleDropdown, int? DepartmentDropdown, int? LocationId)
         {
             ViewData["Filtering"] = "btn-outline-secondary";
             int numberFilters = 0;
 
 
             PopulateDropdownLists();
+
+            //extra selectList for Locations
+            ViewData["LocationId"] = new SelectList(_context.Locations.OrderBy(l => l.LocationName), "Id", "Summary");
 
             //Start with include and make ur expression return IQuerable<Employee> so we can add filter and sort later
             var employees = _context.Employees
@@ -45,13 +48,21 @@ namespace mvc.Controllers
                 employees = employees.Where(e => e.JobTitleId == JobTitleDropdown);
                 numberFilters++;
             }
-
+            if (LocationId.HasValue)
+            {
+                //dot any for many-many 
+                employees = employees.Where(l => l.EmployeeLocations.Any(c => c.LocationId == LocationId));
+                numberFilters++;
+            }
             if ((!string.IsNullOrEmpty(searchString)))
             {
                 employees = employees.Where(e => 
                                     e.LastName.ToUpper().Contains(searchString.ToUpper())
                                     || e.FirstName.ToUpper().Contains(searchString.ToUpper())
-                                    
+                                    || e.Extension.Contains(searchString.ToUpper())
+                                    || e.PhoneNumber.Contains(searchString.ToUpper())
+                                    || e.Username.ToUpper().Contains(searchString.ToUpper())
+
                                     );
                 //employees = employees.Where(e => e.SearchKeywords.ToUpper().Contains(searchString.ToUpper()));
                 numberFilters++;
