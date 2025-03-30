@@ -18,15 +18,39 @@ namespace mvc.Controllers
         }
 
         // GET: Employee
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchString, int? JobTitleDropdown, int? DepartmentDropdown)
         {
+            PopulateDropdownLists();
+
+            //Start with include and make ur expression return IQuerable<Employee> so we can add filter and sort later
             var employees = _context.Employees
                 .Include(e => e.Department)
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .AsNoTracking();
-            return View(await employees.ToListAsync());
+
+            if (DepartmentDropdown.HasValue)
+            {
+                employees = employees.Where(e => e.DepartmentId == DepartmentDropdown);
+            }
+
+            if (JobTitleDropdown.HasValue)
+            {
+                employees = employees.Where(e => e.JobTitleId == JobTitleDropdown);
+            }
+
+            if ((!string.IsNullOrEmpty(searchString)))
+            {
+                employees = employees.Where(e => 
+                                    e.LastName.ToUpper().Contains(searchString.ToUpper())
+                                    || e.FirstName.ToUpper().Contains(searchString.ToUpper())
+                                    
+                                    );
+                //employees = employees.Where(e => e.SearchKeywords.ToUpper().Contains(searchString.ToUpper()));
+            }
+
+            return View(await employees.ToListAsync()); // IQuerable executed when ToList is called
         }
 
         // GET: Employee/Details/5

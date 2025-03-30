@@ -4,110 +4,132 @@
     ViewData["Title"] = "Employees";
 }
 
-<h1>Index</h1>
-
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Summary)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Extension)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.JobTitle)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Department)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EmployeeLocations)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Summary)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Email)
-                </td>
-                <td>
-                    @{
-                        if (item.PhoneFormatted != null && item.Extension != null)
-                        {
-                            <a href="#" data-bs-toggle="tooltip" title="@item.PhoneFormatted">@Html.DisplayFor(modelItem => item.Extension)</a>
-                        }
-                        else if (item.PhoneFormatted != null && item.Extension == null)
-                        {
-                            @Html.DisplayFor(modelItem => item.PhoneFormatted)
-                        }
-                        else if (item.PhoneFormatted == null && item.Extension != null)
-                        {
-                            @Html.DisplayFor(modelItem => item.Extension)
-                        }
-                        else
-                        {
-                            @:n/a
-                        }
-                    }
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.JobTitle.JobTitleName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Department.DepartmentName)
-                </td>
-                <td>
-                    @{
-                        var locCount = item.EmployeeLocations.Count;
-                        if (locCount > 0)
-                        {
-                            var firstLocation = item.EmployeeLocations.FirstOrDefault().Location.Summary;
-                            if (locCount > 1)
-                            {
-                                var locStr = "";//Html string of specialty names separated by <br /> tags
-                                var locList = item.EmployeeLocations.ToList();
+<form asp-controller="Employee" asp-action="Index" method="get">
+    <div class="form-horizontal">
+        <div class="row">
+            <div class="form-group col-md-4">
+                <label class="control-label">Select By Location</label>
+                @* html tag helper, even though old,  becuase it remembers last selection. *@
+                @Html.DropDownList("JobTitleDropdown", null, "All Job Title", htmlAttributes: new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-4">
+                <label class="control-label">Select By Department</label>
+                @Html.DropDownList("DepartmentDropdown", null, "All Department", htmlAttributes: new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-4">
+                <label class="control-label">Search by name</label>
+                @Html.TextBox("SearchString", null, new { @class = "form-control" })
+            </div>
 
-                                for (var i = 1; i < locCount; i++)
-                                {
-                                    locStr += locList[i].Location.Summary + "<br />";
-                                }
-                                <a class="" role="button" data-bs-toggle="collapse" href="#collapseLocation@(item.Id)" aria-expanded="false" aria-controls="collapseLocation@(item.Id)">
-                                    @firstLocation <span class="badge bg-info">@locCount</span>
-                                </a>
-                                <div class="collapse" id="collapseLocation@(item.Id)">
-                                    @Html.Raw(locStr)
-                                </div>
+            <div class="form-group col-md-4 align-self-end">
+                <input type="submit" name="actionButton" value="Filter" class="btn btn-outline-primary" />
+                <a asp-action="Index" class="btn btn-outline-dark">Clear</a>
+            </div>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Summary)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Email)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Extension)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.JobTitle)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Department)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.EmployeeLocations)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Summary)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Email)
+                    </td>
+                    <td>
+                        @{
+                            if (item.PhoneFormatted != null && item.Extension != null)
+                            {
+                                <a href="#" data-bs-toggle="tooltip" title="@item.PhoneFormatted">@Html.DisplayFor(modelItem => item.Extension)</a>
+                            }
+                            else if (item.PhoneFormatted != null && item.Extension == null)
+                            {
+                                @Html.DisplayFor(modelItem => item.PhoneFormatted)
+                            }
+                            else if (item.PhoneFormatted == null && item.Extension != null)
+                            {
+                                @Html.DisplayFor(modelItem => item.Extension)
                             }
                             else
                             {
-                                @firstLocation
+                                @:n/a
                             }
                         }
-                    }
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.JobTitle.JobTitleName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Department.DepartmentName)
+                    </td>
+                    <td>
+                        @{
+                            var locCount = item.EmployeeLocations.Count;
+                            if (locCount > 0)
+                            {
+                                var firstLocation = item.EmployeeLocations.FirstOrDefault().Location.Summary;
+                                if (locCount > 1)
+                                {
+                                    var locStr = "";//Html string of specialty names separated by <br /> tags
+                                    var locList = item.EmployeeLocations.ToList();
 
+                                    for (var i = 1; i < locCount; i++)
+                                    {
+                                        locStr += locList[i].Location.Summary + "<br />";
+                                    }
+                                    <a class="" role="button" data-bs-toggle="collapse" href="#collapseLocation@(item.Id)" aria-expanded="false" aria-controls="collapseLocation@(item.Id)">
+                                        @firstLocation <span class="badge bg-info">@locCount</span>
+                                    </a>
+                                    <div class="collapse" id="collapseLocation@(item.Id)">
+                                        @Html.Raw(locStr)
+                                    </div>
+                                }
+                                else
+                                {
+                                    @firstLocation
+                                }
+                            }
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
 @section Scripts {
     <script src="~/js/tooltips.js"></script>
 }

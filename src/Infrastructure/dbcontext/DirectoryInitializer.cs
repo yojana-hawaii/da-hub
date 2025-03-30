@@ -171,7 +171,7 @@ public static class DirectoryInitializer
         var firstnames = new string[] { "Trent", "Virgil", "Abrille", "Diamond", "Aurelia", "Harvey", "Dara", "Della", "Everest", "Juniper", "Kai", "Kiara", "Napheesa", "Lorraine", "Rafael" };
         var lastnames = new string[] { "Gerrard", "Van Dijk", "Quansah", "Salah", "Diaz", "Nunez", "Gakpo", "Konate", "Becker", "Anthony-Towns", "Grugier-Hill", "Bynum", "Hockenson", "Mundt", "Tyson" };
 
-        var totalEmp = 30;
+        var totalEmp = 100;
 
         var firstCount = firstnames.Length;
         var lastCount = lastnames.Length;
