@@ -18,11 +18,11 @@ namespace mvc.Controllers
         }
 
         // GET: Employee
-        public async Task<IActionResult> Index(string? searchString, int? JobTitleDropdown, int? DepartmentDropdown, int? LocationId)
+        public async Task<IActionResult> Index(string? searchString,
+                                            int? JobTitleDropdown, int? DepartmentDropdown, int? LocationId, int? ManagerDropdown,
+                                            string? actionButton, string sortDirection = "asc", string sortField = "Employee")
         {
-            ViewData["Filtering"] = "btn-outline-secondary";
-            int numberFilters = 0;
-
+           
 
             PopulateDropdownLists();
 
@@ -37,6 +37,32 @@ namespace mvc.Controllers
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .AsNoTracking();
 
+            employees = FilterEmployee(searchString, JobTitleDropdown, DepartmentDropdown, LocationId, ManagerDropdown, employees);
+
+            //sumbit button named actionButton used for filter & sorting. Value is different and that is what comes in 
+            string[] sortOptions = new[] { "Employee", "Email", "Phone", "Job Title", "Department" }; //names have to match table headeer to sort by
+            if (!string.IsNullOrEmpty(actionButton)) // if form was submitted not new  page open
+            {
+                if (sortOptions.Contains(actionButton)) //filter would be actionButton for filter/search but not in sort option define at the top
+                {
+                    if (actionButton == sortField) // reverse the order if same field
+                    {
+                        sortDirection = sortDirection == "asc" ? "desc" : "asc";
+                    }
+                    sortField = actionButton; // sort by action button clicked
+                }
+            }
+
+            employees = SortEmployees(employees, sortField, sortDirection);
+
+            return View(await employees.ToListAsync()); // IQuerable executed when ToList is called
+        }
+
+        private IQueryable<Employee> FilterEmployee(string? searchString, int? JobTitleDropdown, int? DepartmentDropdown, int? LocationId, int? ManagerDropdown, IQueryable<Employee> employees)
+        {
+            ViewData["Filtering"] = "btn-outline-secondary";
+            int numberFilters = 0;
+
             if (DepartmentDropdown.HasValue)
             {
                 employees = employees.Where(e => e.DepartmentId == DepartmentDropdown);
@@ -48,6 +74,11 @@ namespace mvc.Controllers
                 employees = employees.Where(e => e.JobTitleId == JobTitleDropdown);
                 numberFilters++;
             }
+            if(ManagerDropdown.HasValue)
+            {
+                employees = employees.Where(e => e.ManagerId == ManagerDropdown);
+            }
+
             if (LocationId.HasValue)
             {
                 //dot any for many-many 
@@ -56,7 +87,7 @@ namespace mvc.Controllers
             }
             if ((!string.IsNullOrEmpty(searchString)))
             {
-                employees = employees.Where(e => 
+                employees = employees.Where(e =>
                                     e.LastName.ToUpper().Contains(searchString.ToUpper())
                                     || e.FirstName.ToUpper().Contains(searchString.ToUpper())
                                     || e.Extension.Contains(searchString.ToUpper())
@@ -68,14 +99,82 @@ namespace mvc.Controllers
                 numberFilters++;
             }
 
-            if(numberFilters > 0)
+            if (numberFilters > 0)
             {
                 ViewData["Filtering"] = " btn-danger ";
                 ViewData["numberFilters"] = "(" + numberFilters.ToString() + " filter" + (numberFilters > 1 ? "s" : "") + " applied)";
                 ViewData["showFilter"] = " show ";
             }
 
-            return View(await employees.ToListAsync()); // IQuerable executed when ToList is called
+            
+            return employees;
+        }
+
+        private IQueryable<Employee> SortEmployees(IQueryable<Employee> employees, string sortField, string sortDirection)
+        {
+            if(sortField == "Employee")
+            {
+                if(sortDirection == "desc")
+                {
+                    employees = employees.OrderByDescending(e => e.LastName).ThenByDescending(e => e.FirstName);
+                }
+                else
+                {
+                    employees = employees.OrderBy(e => e.LastName).ThenBy( e => e.FirstName);
+                }
+            }
+            else if (sortField == "Email")
+            {
+                if (sortDirection == "desc")
+                {
+                    employees = employees.OrderByDescending(e => e.Email);
+                }
+                else
+                {
+                    employees = employees.OrderBy(e => e.Email);
+                }
+            }
+            else if (sortField == "Phone")
+            {
+                if (sortDirection == "desc")
+                {
+                    employees = employees.OrderByDescending(e => e.Extension).ThenByDescending(e => e.PhoneNumber);
+                }
+                else
+                {
+                    employees = employees.OrderBy(e => e.Extension).ThenBy(e => e.PhoneNumber);
+                }
+            }
+            else if (sortField == "Job Title")
+            {
+                if (sortDirection == "desc")
+                {
+                    employees = employees.OrderByDescending(e => e.JobTitle.JobTitleName);
+                }
+                else
+                {
+                    employees = employees.OrderBy(e => e.JobTitle.JobTitleName);
+                }
+            }
+            else if (sortField == "Department")
+            {
+                if (sortDirection == "desc")
+                {
+                    employees = employees.OrderByDescending(e => e.Department.DepartmentName);
+                }
+                else
+                {
+                    employees = employees.OrderBy(e => e.Department.DepartmentName);
+                }
+            }
+            else
+            {
+                employees = employees.OrderByDescending(e => e.LastName).ThenByDescending(e => e.FirstName);
+            }
+
+            ViewData["sortField"] = sortField;
+            ViewData["sortDirection"] = sortDirection;
+            return employees;
         }
 
         // GET: Employee/Details/5
@@ -208,7 +307,7 @@ namespace mvc.Controllers
             UpdateEmployeeLocationListboxCheckbox(selectedOptions, employeeToUpdate);
 
             if (await TryUpdateModelAsync<Employee>(employeeToUpdate, "",
-                    e => e.Username, e => e.Email, e => e.LastName, e => e.FirstName, e => e.AccountCreated, e => e.Extension, 
+                    e => e.Username, e => e.Email, e => e.LastName, e => e.FirstName, e => e.AccountCreated, e => e.Extension,
                     e => e.PhoneNumber, e => e.HireDate, e => e.Nickname, e => e.EmployeeNumber, e => e.PhotoPath,
                     e => e.JobTitleId, e => e.DepartmentId, e => e.ManagerId))
             {
@@ -216,7 +315,7 @@ namespace mvc.Controllers
                 {
                     await _context.SaveChangesAsync();
                     //display change detail instead of going back to index
-                    return RedirectToAction("Details", new {employeeToUpdate.Id});
+                    return RedirectToAction("Details", new { employeeToUpdate.Id });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -300,11 +399,11 @@ namespace mvc.Controllers
             }
             catch (DbUpdateException ex)
             {
-                if(ex.GetBaseException().Message.Contains("The deleted statement conflicted with reference constraint"))
+                if (ex.GetBaseException().Message.Contains("The deleted statement conflicted with reference constraint"))
                 {
                     ModelState.AddModelError("", "Unable to delete record. Foreign key issue, I think");
                 }
-                else if(ex.GetBaseException().Message.Contains("The DELETE statement conflicted with the SAME TABLE REFERENCE constraint"))
+                else if (ex.GetBaseException().Message.Contains("The DELETE statement conflicted with the SAME TABLE REFERENCE constraint"))
                 {
                     ModelState.AddModelError("", "Cannot delete employee who is set as manager. I think");
                 }
@@ -316,7 +415,7 @@ namespace mvc.Controllers
 
             return View(employee);
 
-            
+
         }
 
 
@@ -331,7 +430,7 @@ namespace mvc.Controllers
         //UPDATE FOR LIST-BOX AND CHECK-BOX
         private void UpdateEmployeeLocationListboxCheckbox(string[] selectedOptions, Employee employeeToUpdate)
         {
-            if(selectedOptions == null)
+            if (selectedOptions == null)
             {
                 employeeToUpdate.EmployeeLocations = new List<EmployeeLocation>();
                 return;
@@ -340,7 +439,7 @@ namespace mvc.Controllers
             var _newOptions = new HashSet<string>(selectedOptions);
             var _currentOptions = new HashSet<int>(employeeToUpdate.EmployeeLocations.Select(el => el.LocationId));
 
-            foreach(var loc in _context.Locations)
+            foreach (var loc in _context.Locations)
             {
                 if (_newOptions.Contains(loc.Id.ToString())) //already selected
                 {
@@ -357,7 +456,7 @@ namespace mvc.Controllers
                 {
                     if (_currentOptions.Contains(loc.Id)) //not selected but in Employee Colection - Remove it
                     {
-                        EmployeeLocation? locationToRemove = employeeToUpdate.EmployeeLocations.FirstOrDefault( e=> e.LocationId == loc.Id);
+                        EmployeeLocation? locationToRemove = employeeToUpdate.EmployeeLocations.FirstOrDefault(e => e.LocationId == loc.Id);
                         if (locationToRemove != null)
                         {
                             _context.Remove(locationToRemove);
@@ -376,9 +475,9 @@ namespace mvc.Controllers
             var selected = new List<ListOptionVM>();
             var available = new List<ListOptionVM>();
 
-            foreach(var loc in allOptions)
+            foreach (var loc in allOptions)
             {
-                if(currentOptions.Contains(loc.Id))
+                if (currentOptions.Contains(loc.Id))
                 {
                     selected.Add(new ListOptionVM
                     {
@@ -403,7 +502,7 @@ namespace mvc.Controllers
 
 
         //CHECK-BOXES
-       
+
         /// <summary>
         /// good for create and delete. Edit needs a little more
         /// allOptions has all locations, IsSelected is true only if current employee has locationId in their intersection table
