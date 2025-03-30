@@ -20,6 +20,10 @@ namespace mvc.Controllers
         // GET: Employee
         public async Task<IActionResult> Index(string? searchString, int? JobTitleDropdown, int? DepartmentDropdown)
         {
+            ViewData["Filtering"] = "btn-outline-secondary";
+            int numberFilters = 0;
+
+
             PopulateDropdownLists();
 
             //Start with include and make ur expression return IQuerable<Employee> so we can add filter and sort later
@@ -33,11 +37,13 @@ namespace mvc.Controllers
             if (DepartmentDropdown.HasValue)
             {
                 employees = employees.Where(e => e.DepartmentId == DepartmentDropdown);
+                numberFilters++;
             }
 
             if (JobTitleDropdown.HasValue)
             {
                 employees = employees.Where(e => e.JobTitleId == JobTitleDropdown);
+                numberFilters++;
             }
 
             if ((!string.IsNullOrEmpty(searchString)))
@@ -48,6 +54,14 @@ namespace mvc.Controllers
                                     
                                     );
                 //employees = employees.Where(e => e.SearchKeywords.ToUpper().Contains(searchString.ToUpper()));
+                numberFilters++;
+            }
+
+            if(numberFilters > 0)
+            {
+                ViewData["Filtering"] = " btn-danger ";
+                ViewData["numberFilters"] = "(" + numberFilters.ToString() + " filter" + (numberFilters > 1 ? "s" : "") + " applied)";
+                ViewData["showFilter"] = " show ";
             }
 
             return View(await employees.ToListAsync()); // IQuerable executed when ToList is called
