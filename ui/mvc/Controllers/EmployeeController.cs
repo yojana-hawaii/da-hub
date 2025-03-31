@@ -21,14 +21,15 @@ namespace mvc.Controllers
 
         // GET: Employee
         public async Task<IActionResult> Index(string? searchString,
-                                            int? JobTitleDropdown, int? DepartmentDropdown, int? LocationId, int? ManagerDropdown,
+                                            int? JobTitleId, int? DepartmentId, int? ManagerId, 
+                                            int? LocationId,
                                             int? page, int? pageSizeId,
                                             string? actionButton, string sortDirection = "asc", string sortField = "Employee")
         {
             PopulateDropdownLists();
 
             //extra selectList for Locations
-            ViewData["LocationId"] = new SelectList(_context.Locations.OrderBy(l => l.LocationName), "Id", "Summary");
+            ViewData["LocationDropdown"] = new SelectList(_context.Locations.OrderBy(l => l.LocationName), "Id", "Summary");
 
             //Start with include and make ur expression return IQuerable<Employee> so we can add filter and sort later
             var employees = _context.Employees
@@ -38,7 +39,7 @@ namespace mvc.Controllers
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .AsNoTracking();
 
-            employees = FilterEmployee(searchString, JobTitleDropdown, DepartmentDropdown, LocationId, ManagerDropdown, employees);
+            employees = FilterEmployee(searchString, JobTitleId, DepartmentId, LocationId, ManagerId, employees);
 
             //sumbit button named actionButton used for filter & sorting. Value is different and that is what comes in 
             string[] sortOptions = new[] { "Employee", "Email", "Phone", "Job Title", "Department" }; //names have to match table headeer to sort by
@@ -63,25 +64,25 @@ namespace mvc.Controllers
             return View(paginatedEmployees); // IQuerable executed when ToList is called
         }
 
-        private IQueryable<Employee> FilterEmployee(string? searchString, int? JobTitleDropdown, int? DepartmentDropdown, int? LocationId, int? ManagerDropdown, IQueryable<Employee> employees)
+        private IQueryable<Employee> FilterEmployee(string? searchString, int? JobTitleId, int? DepartmentId, int? LocationId, int? ManagerId, IQueryable<Employee> employees)
         {
             ViewData["Filtering"] = "btn-outline-secondary";
             int numberFilters = 0;
 
-            if (DepartmentDropdown.HasValue)
+            if (DepartmentId.HasValue)
             {
-                employees = employees.Where(e => e.DepartmentId == DepartmentDropdown);
+                employees = employees.Where(e => e.DepartmentId == DepartmentId);
                 numberFilters++;
             }
 
-            if (JobTitleDropdown.HasValue)
+            if (JobTitleId.HasValue)
             {
-                employees = employees.Where(e => e.JobTitleId == JobTitleDropdown);
+                employees = employees.Where(e => e.JobTitleId == JobTitleId);
                 numberFilters++;
             }
-            if (ManagerDropdown.HasValue)
+            if (ManagerId.HasValue)
             {
-                employees = employees.Where(e => e.ManagerId == ManagerDropdown);
+                employees = employees.Where(e => e.ManagerId == ManagerId);
             }
 
             if (LocationId.HasValue)
