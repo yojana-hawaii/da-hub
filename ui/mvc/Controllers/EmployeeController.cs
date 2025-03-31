@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using mvc.CustomContoller;
 using mvc.Utilities;
 using mvc.ViewModel;
 
 namespace mvc.Controllers
 {
-    public class EmployeeController : Controller
+    public class EmployeeController : CognizantController
     {
         private readonly DirectoryContext _context;
 
@@ -21,11 +22,9 @@ namespace mvc.Controllers
         // GET: Employee
         public async Task<IActionResult> Index(string? searchString,
                                             int? JobTitleDropdown, int? DepartmentDropdown, int? LocationId, int? ManagerDropdown,
-                                            int? page,
+                                            int? page, int? pageSizeId,
                                             string? actionButton, string sortDirection = "asc", string sortField = "Employee")
         {
-
-
             PopulateDropdownLists();
 
             //extra selectList for Locations
@@ -57,7 +56,9 @@ namespace mvc.Controllers
                 }
             }
 
-            var paginatedEmployees = await SortEmployeesAsync(employees, sortField, sortDirection, page);
+            
+
+            var paginatedEmployees = await SortEmployeesAsync(employees, sortField, sortDirection, page, pageSizeId);
 
             return View(paginatedEmployees); // IQuerable executed when ToList is called
         }
@@ -114,7 +115,7 @@ namespace mvc.Controllers
             return employees;
         }
 
-        private async Task<PaginatedList<Employee>> SortEmployeesAsync(IQueryable<Employee> employees, string sortField, string sortDirection, int? page)
+        private async Task<PaginatedList<Employee>> SortEmployeesAsync(IQueryable<Employee> employees, string sortField, string sortDirection, int? page, int? pageSizeId)
         {
             if (sortField == "Employee")
             {
@@ -182,7 +183,8 @@ namespace mvc.Controllers
 
 
             //pagination
-            int pageSize = 10; // 10 employee per page
+            int pageSize = PageSizeHelper.SetPageSize(HttpContext, pageSizeId, ContollerName());// CognizantController
+            ViewData["pageSizeId"] = PageSizeHelper.PageSizeList(pageSize);
             var pagedData = await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), page ?? 1, pageSize);
 
 
