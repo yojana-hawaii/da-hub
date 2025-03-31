@@ -83,6 +83,7 @@ namespace mvc.Controllers
             if (ManagerId.HasValue)
             {
                 employees = employees.Where(e => e.ManagerId == ManagerId);
+                numberFilters++;
             }
 
             if (LocationId.HasValue)

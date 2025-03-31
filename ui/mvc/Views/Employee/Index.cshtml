@@ -19,7 +19,7 @@
                 <div class="row">
                     <div class="form-group col-md-4">
                         <label class="control-label">Select By Location</label>
-                        @* html tag helper, even though old,  becuase it remembers last selection. *@
+                        @* html tag helper > Tag helper works well with one object. Html helper for IEnumerable<Object> *@
                         @Html.DropDownList("JobTitleId", ViewBag.JobTitleDropdown, "All Job Titles", htmlAttributes: new { @class = "form-control" })
                     </div>
                     <div class="form-group col-md-6">
