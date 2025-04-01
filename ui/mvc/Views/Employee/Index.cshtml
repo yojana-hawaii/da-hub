@@ -1,8 +1,6 @@
 ﻿@model IEnumerable<Domain.directory.Employee>
 
-@{
-    ViewData["Title"] = "Employees";
-}
+<partial name="_AddHeading" />
 
 <form asp-controller="Employee" asp-action="Index" method="get">
     @* hidden inputs to keep track of last sort direction & sort field *@

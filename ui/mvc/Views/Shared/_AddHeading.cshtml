@@ -1,0 +1,30 @@
+﻿@{
+    var controller = @ViewBag.ControllerFriendlyName;
+
+    var summary = "this " + controller;
+    if (ViewData.ModelMetadata.Properties.FirstOrDefault(p => p.PropertyName == "Summary") != null)
+    {
+        summary = Model.Summary.ToString();
+    }
+
+
+    if(ViewBag.ActionName.ToString() == "Details")
+    {
+        @:<h2>@controller Details </h2>
+    }
+    else if(ViewData["ActionName"]?.ToString() == "Index")
+    {
+        @:<h2>@controller List</h2>
+    }
+    else if(ViewData["ActionName"]?.ToString() == "Delete" || ViewBag.ActionName.ToString() == "Remove" || ViewBag.ActionName == "Edit")
+    {
+        @:<h2>@ViewBag.ActionName @controller</h2>
+        <p>
+            <h4>Are you sure you want @ViewData["ActionName"]?.ToString() @(summary)?</h4>
+        </p>
+    }
+    else
+    {
+        @:<h2>@ViewBag.ActionName @ViewBag.ControllerFiendlyName</h2>
+    }
+}

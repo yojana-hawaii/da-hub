@@ -1,0 +1,17 @@
+﻿@{
+    if (ViewData.ContainsKey("ControllerName"))
+    {
+        if (ViewData.ContainsKey("returnUrl"))
+        {
+            <a href="@ViewBag.returnUrl">Back to @ViewBag.ControllerFriendlyName List</a>
+        }
+        else
+        {
+            <a asp-action="Index">Back to the @ViewBag.ControllerFriendlyName</a>
+        }
+    }
+    else
+    {
+        <a asp-action="Index">Back to the List</a>
+    }
+}

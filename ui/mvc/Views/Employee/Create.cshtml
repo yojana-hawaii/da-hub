@@ -1,11 +1,8 @@
 ﻿@using mvc.ViewModel
 @model Domain.directory.Employee
 
-@{
-    ViewData["Title"] = "Create Employee";
-}
 
-<h1>Create Employee</h1>
+<partial name="_AddHeading" />
 
 <hr />
 <form asp-action="Create">
@@ -132,9 +129,7 @@
     </div>
 </form>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+<partial name="_AddBackToIndex"/>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
