@@ -1,13 +1,8 @@
 ﻿@model Domain.directory.Fax
 
-@{
-    ViewData["Title"] = "Fax Details";
-}
-
-<h1>Details</h1>
+<partial name="_AddHeading" />
 
 <div>
-    <h4>Fax</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -50,5 +45,5 @@
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <partial name="_AddLinkBackToIndex"/>
 </div>

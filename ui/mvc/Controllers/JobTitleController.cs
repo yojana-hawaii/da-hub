@@ -2,10 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Domain.directory;
 using Infrastructure.dbcontext;
+using mvc.CustomController;
 
 namespace mvc.Controllers;
 
-public class JobTitleController : Controller
+public class JobTitleController : ReturnUrlController
 {
     private readonly DirectoryContext _context;
 

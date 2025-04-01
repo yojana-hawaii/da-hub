@@ -4,10 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Domain.directory;
 using Infrastructure.dbcontext;
 using Microsoft.EntityFrameworkCore.Storage;
+using mvc.CustomController;
 
 namespace mvc.Controllers;
 
-public class FaxController : Controller
+public class FaxController : ReturnUrlController
 {
     private readonly DirectoryContext _context;
 

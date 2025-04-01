@@ -1,12 +1,6 @@
 ﻿@model Domain.directory.JobTitle
 
-@{
-    ViewData["Title"] = "Job Title Edit";
-}
-
-<h1>Edit</h1>
-
-<h4>JobTitle</h4>
+<partial name="_AddHeading" />
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -31,7 +25,7 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <partial name="_AddLinkBackToIndex"/>
 </div>
 
 @section Scripts {

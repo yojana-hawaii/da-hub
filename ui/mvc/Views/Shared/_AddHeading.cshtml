@@ -1,11 +1,8 @@
 ﻿@{
     var controller = @ViewBag.ControllerFriendlyName;
 
-    var summary = "this " + controller;
-    if (ViewData.ModelMetadata.Properties.FirstOrDefault(p => p.PropertyName == "Summary") != null)
-    {
-        summary = Model.Summary.ToString();
-    }
+   
+ 
 
 
     if(ViewBag.ActionName.ToString() == "Details")
@@ -16,11 +13,23 @@
     {
         @:<h2>@controller List</h2>
     }
+    else if (ViewBag.ActionName.ToString() == "Create")
+    {
+        @:<h2>Create @controller</h2>
+
+    }
     else if(ViewData["ActionName"]?.ToString() == "Delete" || ViewBag.ActionName.ToString() == "Remove" || ViewBag.ActionName == "Edit")
     {
+
+        var name = "this " + controller;
+        if ((ViewData.ModelMetadata.Properties.FirstOrDefault(p => p.PropertyName == "Summary")) != null)
+        {
+            name = Model.Summary.ToString();
+        }
+
         @:<h2>@ViewBag.ActionName @controller</h2>
         <p>
-            <h4>Are you sure you want @ViewData["ActionName"]?.ToString() @(summary)?</h4>
+            <h4>Are you sure you want @ViewData["ActionName"]?.ToString() @(name)?</h4>
         </p>
     }
     else

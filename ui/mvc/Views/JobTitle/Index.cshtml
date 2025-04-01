@@ -1,13 +1,8 @@
 ﻿@model IEnumerable<Domain.directory.JobTitle>
 
-@{
-    ViewData["Title"] = "Job Title";
-}
-
-<h1>Index</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Create @ViewBag.ControllerName</a>
 </p>
 <table class="table">
     <thead>

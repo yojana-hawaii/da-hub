@@ -1,12 +1,6 @@
 ﻿@model Domain.directory.Location
 
-@{
-    ViewData["Title"] = "Location Create";
-}
-
-<h1>Create</h1>
-
-<h4>Location</h4>
+<partial name="_AddHeading" />
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -30,7 +24,7 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <partial name="_AddLinkBackToIndex" />
 </div>
 
 @section Scripts {
