@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using mvc.CustomContoller;
+using mvc.CustomController;
 using mvc.Utilities;
 using mvc.ViewModel;
 
 namespace mvc.Controllers
 {
-    public class EmployeeController : CognizantController
+    public class EmployeeController : ReturnUrlController
     {
         private readonly DirectoryContext _context;
 
@@ -185,7 +185,7 @@ namespace mvc.Controllers
 
 
             //pagination
-            int pageSize = PageSizeHelper.SetPageSize(HttpContext, pageSizeId, ContollerName());// CognizantController
+            int pageSize = PageSizeHelper.SetPageSize(HttpContext, pageSizeId, ControllerName());// CognizantController
             ViewData["pageSizeId"] = PageSizeHelper.PageSizeList(pageSize);
             var pagedData = await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), page ?? 1, pageSize);
 
@@ -248,7 +248,8 @@ namespace mvc.Controllers
                 {
                     _context.Add(employee);
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    //display change detail instead of going back to index
+                    return RedirectToAction("Details", new { employee.Id });
                 }
             }
             catch (RetryLimitExceededException)
@@ -411,7 +412,8 @@ namespace mvc.Controllers
                     _context.Employees.Remove(employee);
                 }
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToIndexAfterSaveChanges();
             }
             catch (DbUpdateException ex)
             {
@@ -434,6 +436,15 @@ namespace mvc.Controllers
 
         }
 
+        private IActionResult RedirectToIndexAfterSaveChanges()
+        {
+            var returnUrl = ViewData["returnUrl"]?.ToString();
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            return Redirect(returnUrl);
+        }
 
         private bool EmployeeExists(int id)
         {
