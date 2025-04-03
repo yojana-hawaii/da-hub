@@ -16,11 +16,19 @@ public class DirectoryContext : DbContext
         _httpContextAccessor = httpContextAccessor;
         if (_httpContextAccessor.HttpContext != null)
         {
-            LoggedInUser = _httpContextAccessor.HttpContext.User.Identity?.Name;
-            LoggedInUser = LoggedInUser ?? "Unknown";
+            LoggedInUser = _httpContextAccessor.HttpContext.User.Identity?.Name ?? "Unknown";
+        }
+        else
+        {
+            LoggedInUser = "seed-data-constructor-overload";
+
         }
     }
-    public DirectoryContext(DbContextOptions<DirectoryContext> options) : base(options) { }
+    public DirectoryContext(DbContextOptions<DirectoryContext> options) : base(options)
+    {
+        _httpContextAccessor = null;
+        LoggedInUser = "seed-data-base-consstructor";
+    }
 
 
     public DbSet<Employee> Employees { get; set; }
@@ -44,7 +52,7 @@ public class DirectoryContext : DbContext
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken)
     {
         OnBeforeSaving();
-        return base.SaveChangesAsync(acceptAllChangesOnSuccess,cancellationToken);
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
     private void OnBeforeSaving()
@@ -52,7 +60,7 @@ public class DirectoryContext : DbContext
         var entities = ChangeTracker.Entries();
         foreach (var entity in entities)
         {
-            if(entity.Entity is IAuditable trackable)
+            if (entity.Entity is IAuditable trackable)
             {
                 var now = DateTime.UtcNow;
                 switch (entity.State)

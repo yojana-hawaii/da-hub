@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Domain.extension;
 
-public class AuditableEntity : IAuditable
+public abstract class AuditableEntity : IAuditable
 {
     [ScaffoldColumn(false)]
     [StringLength(100)]
