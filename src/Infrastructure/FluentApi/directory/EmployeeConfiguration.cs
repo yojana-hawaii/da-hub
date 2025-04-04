@@ -42,6 +42,10 @@ internal class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
+        //concurrency
+        builder
+            .Property(e => e.RowVersion).IsRowVersion();
+
 
     }
 }

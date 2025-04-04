@@ -91,6 +91,12 @@ public class Employee : AuditableEntity, IValidatableObject
     public string? PhotoPath { get; set; }
 
 
+    //for concurrenct
+    [ScaffoldColumn(false)]
+    [Timestamp]
+    public Byte[]? RowVersion { get; set; }
+
+
 
     //Foreign key
     public int? JobTitleId { get; set; }

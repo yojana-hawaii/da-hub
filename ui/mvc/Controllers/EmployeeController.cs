@@ -3,6 +3,7 @@ using Infrastructure.dbcontext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using Microsoft.EntityFrameworkCore.Storage;
 using mvc.CustomController;
 using mvc.Utilities;
@@ -21,7 +22,7 @@ namespace mvc.Controllers
 
         // GET: Employee
         public async Task<IActionResult> Index(string? searchString,
-                                            int? JobTitleId, int? DepartmentId, int? ManagerId, 
+                                            int? JobTitleId, int? DepartmentId, int? ManagerId,
                                             int? LocationId,
                                             int? page, int? pageSizeId,
                                             string? actionButton, string sortDirection = "asc", string sortField = "Employee")
@@ -57,7 +58,7 @@ namespace mvc.Controllers
                 }
             }
 
-            
+
 
             var paginatedEmployees = await SortEmployeesAsync(employees, sortField, sortDirection, page, pageSizeId);
 
@@ -306,7 +307,7 @@ namespace mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, string[] selectedOptions)
+        public async Task<IActionResult> Edit(int id, string[] selectedOptions, Byte[] RowVersion)
         {
             var employeeToUpdate = await _context.Employees
                 .Include(e => e.Department)
@@ -323,6 +324,9 @@ namespace mvc.Controllers
 
             UpdateEmployeeLocationListboxCheckbox(selectedOptions, employeeToUpdate);
 
+            //something may have change between GET and POST action. Start with RowVersion from GET 
+            _context.Entry(employeeToUpdate).Property("RowVersion").OriginalValue = RowVersion;
+
             if (await TryUpdateModelAsync<Employee>(employeeToUpdate, "",
                     e => e.Username, e => e.Email, e => e.LastName, e => e.FirstName, e => e.AccountCreated, e => e.Extension,
                     e => e.PhoneNumber, e => e.HireDate, e => e.Nickname, e => e.EmployeeNumber, e => e.PhotoPath,
@@ -334,16 +338,103 @@ namespace mvc.Controllers
                     //display change detail instead of going back to index
                     return RedirectToAction("Details", new { employeeToUpdate.Id });
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
-                    if (!EmployeeExists(employeeToUpdate.Id))
+                    var exceptionEntry = ex.Entries.Single();
+                    var clientValues = (Employee)exceptionEntry.Entity;
+                    var databaseEntry = exceptionEntry.GetDatabaseValues();
+
+                    if (databaseEntry == null)
                     {
-                        return NotFound();
+                        ModelState.AddModelError("", "Unable to save changes. Patient was delete by another user");
                     }
                     else
                     {
-                        throw;
+                        var databaseValue = (Employee)databaseEntry.ToObject();
+
+                        if (databaseValue.Username != clientValues.Username)
+                            ModelState.AddModelError("Username", "Curent Value: " + databaseValue.Username);
+
+                        if (databaseValue.FirstName != clientValues.FirstName)
+                            ModelState.AddModelError("FirstName", "Curent Value: " + databaseValue.FirstName);
+
+                        if (databaseValue.LastName != clientValues.LastName)
+                            ModelState.AddModelError("LastName", "Curent Value: " + databaseValue.LastName);
+
+                        if (databaseValue.Extension != clientValues.Extension)
+                            ModelState.AddModelError("Extension", "Curent Value: " + databaseValue.Extension);
+
+                        if (databaseValue.PhoneNumber != clientValues.PhoneNumber)
+                            ModelState.AddModelError("PhoneNumber", "Curent Value: " + databaseValue.PhoneFormatted);
+
+                        if (databaseValue.Email != clientValues.Email)
+                            ModelState.AddModelError("Email", "Curent Value: " + databaseValue.Email);
+
+                        if (databaseValue.Nickname != clientValues.Nickname)
+                            ModelState.AddModelError("Nickname", "Curent Value: " + databaseValue.Nickname);
+
+                        if (databaseValue.EmployeeNumber != clientValues.EmployeeNumber)
+                            ModelState.AddModelError("EmployeeNumber", "Curent Value: " + databaseValue.EmployeeNumber);
+
+                        if (databaseValue.PhotoPath != clientValues.PhotoPath)
+                            ModelState.AddModelError("PhotoPath", "Curent Value: " + databaseValue.PhotoPath);
+
+
+
+                        if (databaseValue.AccountCreated != clientValues.AccountCreated)
+                            ModelState.AddModelError("AccountCreated", "Curent Value: " + String.Format("{0:d}", databaseValue.AccountCreated));
+
+                        if (databaseValue.HireDate != clientValues.HireDate)
+                            ModelState.AddModelError("HireDate", "Curent Value: " + String.Format("{0:d}", databaseValue.HireDate));
+
+
+
+                        //foreign key
+                        if (databaseValue.DepartmentId != clientValues.DepartmentId)
+                        {
+                            if (databaseValue.DepartmentId.HasValue)
+                            {
+                                Department? dbDepartment = await _context.Departments.FirstOrDefaultAsync(d => d.Id == databaseValue.DepartmentId);
+                                ModelState.AddModelError("DepartmentId", $"Curent Value:  {dbDepartment?.DepartmentName}");
+                            }
+                        }
+
+                        if (databaseValue.JobTitleId != clientValues.JobTitleId)
+                        {
+                            if (databaseValue.JobTitleId.HasValue)
+                            {
+                                JobTitle? dbJob = await _context.JobTitles.FirstOrDefaultAsync(j => j.Id == databaseValue.JobTitleId);
+                                ModelState.AddModelError("JobTitleId", $"Curent Value: {dbJob?.JobTitleName}");
+                            }
+                        }
+
+                        if (databaseValue.ManagerId != clientValues.ManagerId)
+                        {
+                            if (databaseValue.ManagerId.HasValue)
+                            {
+                                Employee? dbMngr = await _context.Employees.FirstOrDefaultAsync(m => m.Id == databaseValue.ManagerId);
+                                ModelState.AddModelError("ManagerId", $"Curent Value: {dbMngr?.Summary}");
+                            }
+                        }
+
+
+
+                        if (databaseValue.EmployeeLocations != clientValues.EmployeeLocations)
+                        {
+                            ModelState.AddModelError("EmployeeLocations", "Curent Value: " + databaseValue.EmployeeLocations);
+
+                        }
+
+
+                        ModelState.AddModelError("", "The record you attempted to change was modified by somone else. The edit process has been paused. " +
+                            "If you still want save your version click SAVE again.");
+
+
+                        //update rowVersion with database value, and remove RowVErsion Error from model state
+                        employeeToUpdate.RowVersion = databaseValue.RowVersion ?? Array.Empty<Byte>();
+                        ModelState.Remove("RowVersion");
                     }
+
                 }
                 catch (RetryLimitExceededException)
                 {
@@ -352,7 +443,7 @@ namespace mvc.Controllers
                 catch (DbUpdateException ex)
                 {
                     string err = ex.GetBaseException().Message;
-                    if (err.Contains("unique") && err.Contains("ix_employee_username"))
+                    if (err.Contains("UNIQUE") && err.Contains("ix_employee_username"))
                     {
                         ModelState.AddModelError("Username", "Unable to save duplicate username.");
                     }
