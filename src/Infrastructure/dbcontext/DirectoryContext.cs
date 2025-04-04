@@ -62,7 +62,7 @@ public class DirectoryContext : DbContext
         {
             if (entity.Entity is IAuditable trackable)
             {
-                var now = DateTime.UtcNow;
+                var now = DateTime.Now;
                 switch (entity.State)
                 {
                     case EntityState.Modified:
