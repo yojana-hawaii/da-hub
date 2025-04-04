@@ -17,28 +17,33 @@ public static class DirectoryInitializer
     public static void Initialize(IServiceProvider serviceProvider,
         bool DeleteDatabase = false, bool UseMigrations = true, bool SeedSampleData = true)
     {
-        using DirectoryContext _context = new(serviceProvider.GetRequiredService<DbContextOptions<DirectoryContext>>());
+        using DirectoryContext _context = new DirectoryContext(serviceProvider.GetRequiredService<DbContextOptions<DirectoryContext>>());
 
+        //refresh database as per the parameter options
         #region Prepare the database depedning on options
         try
         {
-            //using migration
-            if (UseMigrations)
+            //CanConnect() return false if database is not there > so create database if delete option is passed or database does not exists
+            if (DeleteDatabase || !_context.Database.CanConnect())
             {
-                if (DeleteDatabase)
+                _context.Database.EnsureDeleted(); //delete if exists
+                if(UseMigrations)
                 {
-                    _context.Database.EnsureDeleted(); //delete exisiting version
+                    _context.Database.Migrate(); // create database and apply all migration
                 }
-                _context.Database.Migrate(); // apply all migrationa
-            }
-            else //no migration.Delete everything and recreate
-            {
-                if (DeleteDatabase)
+                else
                 {
-                    _context.Database.EnsureDeleted();
-                    _context.Database.EnsureCreated();
+                    _context.Database.EnsureCreated(); // bypass migration. just make sure database exists
                 }
             }
+            else
+            {
+                if (UseMigrations)
+                {
+                    _context.Database.Migrate();
+                }
+            }
+
         }
         catch (Exception ex)
         {
@@ -109,7 +114,7 @@ public static class DirectoryInitializer
 
         foreach (var id in empIds)
         {
-            if(id % noLoc == 0)
+            if (id % noLoc == 0)
             {
                 continue;
             }
@@ -144,7 +149,7 @@ public static class DirectoryInitializer
             Debug.WriteLine(ex.GetBaseException().Message);
         }
     }
-    
+
     private static void SeedManager(DirectoryContext context, Random rnd)
     {
 
@@ -153,7 +158,7 @@ public static class DirectoryInitializer
         //add manager , random one with no manager
         foreach (var emp in context.Employees)
         {
-            if(emp.Id == ceo) { continue; }
+            if (emp.Id == ceo) { continue; }
             emp.ManagerId = rnd.Next(1, 5);
         }
         try
@@ -165,7 +170,7 @@ public static class DirectoryInitializer
             Debug.WriteLine(ex.GetBaseException().Message);
         }
     }
-   
+
     private static void SeedEmployee(DirectoryContext context, Random rnd)
     {
         var firstnames = new string[] { "Trent", "Virgil", "Abrille", "Diamond", "Aurelia", "Harvey", "Dara", "Della", "Everest", "Juniper", "Kai", "Kiara", "Napheesa", "Lorraine", "Rafael" };
