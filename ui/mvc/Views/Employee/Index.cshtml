@@ -58,22 +58,22 @@
                 <th>
                     <input type="submit" name="actionButton" value="Employee" class="btn btn-link" />
                 </th>
-                <th>
+                <th class="d-none d-lg-table-cell">
                     <input type="submit" name="actionButton" value="Email" class="btn btn-link" />
                 </th>
                 <th>
                     <input type="submit" name="actionButton" value="Phone" class="btn btn-link" />
                 </th>
-                <th>
+                <th class="d-none d-xl-table-cell">
                     <input type="submit" name="actionButton" value="Job Title" class="btn btn-link" />
                 </th>
-                <th>
+                <th class="d-none d-sm-table-cell">
                     <input type="submit" name="actionButton" value="Department" class="btn btn-link" />
                 </th>
-                <th>
+                <th class="d-none d-lg-table-cell">
                     <input type="submit" name="" value="Location" class="btn btn-toolbar" />
                 </th>
-                <th></th>
+                <th class="d-none d-xl-table-cell"></th>
             </tr>
         </thead>
         <tbody>
@@ -83,7 +83,7 @@
                     <td>
                         @Html.DisplayFor(modelItem => item.Summary)
                     </td>
-                    <td>
+                    <td class="d-none d-lg-table-cell">
                         @Html.DisplayFor(modelItem => item.Email)
                     </td>
                     <td>
@@ -106,13 +106,13 @@
                             }
                         }
                     </td>
-                    <td>
+                    <td class="d-none d-xl-table-cell">
                         @Html.DisplayFor(modelItem => item.JobTitle.JobTitleName)
                     </td>
-                    <td>
+                    <td class="d-none d-sm-table-cell">
                         @Html.DisplayFor(modelItem => item.Department.DepartmentName)
                     </td>
-                    <td>
+                    <td class="d-none d-lg-table-cell">
                         @{
                             var locCount = item.EmployeeLocations.Count;
                             if (locCount > 0)
@@ -141,7 +141,7 @@
                             }
                         }
                     </td>
-                    <td>
+                    <td class="d-none d-xl-table-cell">
                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                         <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                         <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
