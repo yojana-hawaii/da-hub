@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /src/Infrastructure/SqlQuery/directory.sql
 /src/Infrastructure/SqlQuery/query.sql
+/ui/mvc/appsettings.json
