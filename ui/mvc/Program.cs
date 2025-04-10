@@ -1,9 +1,11 @@
 using Infrastructure.dbcontext;
+using Microsoft.EntityFrameworkCore;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,7 @@ builder.Services.AddDbContext<DirectoryContext>(
         )
     );
 
+//Okta
 builder.Services.AddAuthentication(options =>
 {
     // check if user has authentication cookie
@@ -20,35 +23,30 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
+    .AddCookie()
     .AddOpenIdConnect(options =>
     {
-        //these config data should go in configuration file -> for learning
-        options.MetadataAddress = builder.Configuration["federation:address"];
-        options.ClientId = builder.Configuration["federation:clientId"];
-
-        options.SignInScheme = "Cookies";
+        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.Authority = builder.Configuration["Okta:Domain"];
         options.RequireHttpsMetadata = true;
+        options.ClientId = builder.Configuration["Okta:ClientId"];
+        options.ClientSecret = builder.Configuration["Okta:ClientSecret"];
+        //authorization code grant type
         options.ResponseType = OpenIdConnectResponseType.Code;
-        // options.ResponseMode = OpenIdConnectResponseMode.FormPost;
-        options.UsePkce = false;
-
+        options.GetClaimsFromUserInfoEndpoint = true;
         options.Scope.Clear();
         options.Scope.Add("openid");
-
+        options.Scope.Add("profile");
         options.SaveTokens = true;
-    })
-    .AddCookie(options =>
-    {
-        options.AccessDeniedPath = "/";
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            NameClaimType = "name",
+            RoleClaimType = "groups",
+            ValidateIssuer = true
+        };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy(
-        "CanAccessAdminArea",
-        policyBuilder => policyBuilder.RequireClaim(ClaimTypes.Role, "dahub-admin")
-        );
-});
+builder.Services.AddAuthorization();
 
 
 // Add services to the container.
@@ -79,10 +77,10 @@ app.MapControllerRoute(
     pattern: "{controller=Employee}/{action=Index}/{id?}");
 
 //to prepare the database and seed data. 
-using(var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    DirectoryInitializer.Initialize(serviceProvider: services, DeleteDatabase: false, UseMigrations: true,SeedSampleData: true);
+    DirectoryInitializer.Initialize(serviceProvider: services, DeleteDatabase: false, UseMigrations: true, SeedSampleData: true);
 }
 
 app.Run();
