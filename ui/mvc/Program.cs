@@ -1,6 +1,9 @@
 using Infrastructure.dbcontext;
-using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +12,44 @@ builder.Services.AddDbContext<DirectoryContext>(
         builder.Configuration.GetConnectionString("DaHub")
         )
     );
+
+builder.Services.AddAuthentication(options =>
+{
+    // check if user has authentication cookie
+    // if they dont then default is open id connect
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+})
+    .AddOpenIdConnect(options =>
+    {
+        //these config data should go in configuration file -> for learning
+        options.MetadataAddress = builder.Configuration["federation:address"];
+        options.ClientId = builder.Configuration["federation:clientId"];
+
+        options.SignInScheme = "Cookies";
+        options.RequireHttpsMetadata = true;
+        options.ResponseType = OpenIdConnectResponseType.Code;
+        // options.ResponseMode = OpenIdConnectResponseMode.FormPost;
+        options.UsePkce = false;
+
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+
+        options.SaveTokens = true;
+    })
+    .AddCookie(options =>
+    {
+        options.AccessDeniedPath = "/";
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(
+        "CanAccessAdminArea",
+        policyBuilder => policyBuilder.RequireClaim(ClaimTypes.Role, "dahub-admin")
+        );
+});
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -30,6 +71,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
