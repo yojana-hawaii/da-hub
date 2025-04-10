@@ -1,5 +1,6 @@
 ﻿using Domain.directory;
 using Infrastructure.dbcontext;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -65,136 +66,9 @@ namespace mvc.Controllers
             return View(paginatedEmployees); // IQuerable executed when ToList is called
         }
 
-        private IQueryable<Employee> FilterEmployee(string? searchString, int? JobTitleId, int? DepartmentId, int? LocationId, int? ManagerId, IQueryable<Employee> employees)
-        {
-            ViewData["Filtering"] = "btn-outline-secondary";
-            int numberFilters = 0;
-
-            if (DepartmentId.HasValue)
-            {
-                employees = employees.Where(e => e.DepartmentId == DepartmentId);
-                numberFilters++;
-            }
-
-            if (JobTitleId.HasValue)
-            {
-                employees = employees.Where(e => e.JobTitleId == JobTitleId);
-                numberFilters++;
-            }
-            if (ManagerId.HasValue)
-            {
-                employees = employees.Where(e => e.ManagerId == ManagerId);
-                numberFilters++;
-            }
-
-            if (LocationId.HasValue)
-            {
-                //dot any for many-many 
-                employees = employees.Where(l => l.EmployeeLocations.Any(c => c.LocationId == LocationId));
-                numberFilters++;
-            }
-            if ((!string.IsNullOrEmpty(searchString)))
-            {
-                employees = employees.Where(e =>
-                                    e.LastName.ToUpper().Contains(searchString.ToUpper())
-                                    || e.FirstName.ToUpper().Contains(searchString.ToUpper())
-                                    || e.Extension.Contains(searchString.ToUpper())
-                                    || e.PhoneNumber.Contains(searchString.ToUpper())
-                                    || e.Username.ToUpper().Contains(searchString.ToUpper())
-
-                                    );
-                //employees = employees.Where(e => e.SearchKeywords.ToUpper().Contains(searchString.ToUpper()));
-                numberFilters++;
-            }
-
-            if (numberFilters > 0)
-            {
-                ViewData["Filtering"] = " btn-danger ";
-                ViewData["numberFilters"] = "(" + numberFilters.ToString() + " filter" + (numberFilters > 1 ? "s" : "") + " applied)";
-                ViewData["showFilter"] = " show ";
-            }
-
-
-            return employees;
-        }
-
-        private async Task<PaginatedList<Employee>> SortEmployeesAsync(IQueryable<Employee> employees, string sortField, string sortDirection, int? page, int? pageSizeId)
-        {
-            if (sortField == "Employee")
-            {
-                if (sortDirection == "desc")
-                {
-                    employees = employees.OrderByDescending(e => e.LastName).ThenByDescending(e => e.FirstName);
-                }
-                else
-                {
-                    employees = employees.OrderBy(e => e.LastName).ThenBy(e => e.FirstName);
-                }
-            }
-            else if (sortField == "Email")
-            {
-                if (sortDirection == "desc")
-                {
-                    employees = employees.OrderByDescending(e => e.Email);
-                }
-                else
-                {
-                    employees = employees.OrderBy(e => e.Email);
-                }
-            }
-            else if (sortField == "Phone")
-            {
-                if (sortDirection == "desc")
-                {
-                    employees = employees.OrderByDescending(e => e.Extension).ThenByDescending(e => e.PhoneNumber);
-                }
-                else
-                {
-                    employees = employees.OrderBy(e => e.Extension).ThenBy(e => e.PhoneNumber);
-                }
-            }
-            else if (sortField == "Job Title")
-            {
-                if (sortDirection == "desc")
-                {
-                    employees = employees.OrderByDescending(e => e.JobTitle.JobTitleName);
-                }
-                else
-                {
-                    employees = employees.OrderBy(e => e.JobTitle.JobTitleName);
-                }
-            }
-            else if (sortField == "Department")
-            {
-                if (sortDirection == "desc")
-                {
-                    employees = employees.OrderByDescending(e => e.Department.DepartmentName);
-                }
-                else
-                {
-                    employees = employees.OrderBy(e => e.Department.DepartmentName);
-                }
-            }
-            else
-            {
-                employees = employees.OrderByDescending(e => e.LastName).ThenByDescending(e => e.FirstName);
-            }
-
-            //hidden field in Index view to track current sorting, just incase user clicks on same sorting, do the reverse. asc then desc then asc ...
-            ViewData["sortField"] = sortField;
-            ViewData["sortDirection"] = sortDirection;
-
-
-            //pagination
-            int pageSize = PageSizeHelper.SetPageSize(HttpContext, pageSizeId, ControllerName());// CognizantController
-            ViewData["pageSizeId"] = PageSizeHelper.PageSizeList(pageSize);
-            var pagedData = await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), page ?? 1, pageSize);
-
-
-            return pagedData;
-        }
-
+        
         // GET: Employee/Details/5
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -218,6 +92,7 @@ namespace mvc.Controllers
         }
 
         // GET: Employee/Create
+        [Authorize]
         public IActionResult Create()
         {
             Employee employee = new();
@@ -232,6 +107,7 @@ namespace mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Create([Bind("Username,Email,FirstName,LastName,Extension,PhoneNumber," +
                             "AccountCreated,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee, string[] selectedOptions)
         {
@@ -280,6 +156,7 @@ namespace mvc.Controllers
 
 
         // GET: Employee/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -307,6 +184,7 @@ namespace mvc.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Edit(int id, string[] selectedOptions, Byte[] RowVersion)
         {
             var employeeToUpdate = await _context.Employees
@@ -463,6 +341,7 @@ namespace mvc.Controllers
         }
 
         // GET: Employee/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -487,6 +366,7 @@ namespace mvc.Controllers
         // POST: Employee/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var employee = await _context.Employees
@@ -542,6 +422,135 @@ namespace mvc.Controllers
             return _context.Employees.Any(e => e.Id == id);
         }
 
+        //filter and pagination
+        private IQueryable<Employee> FilterEmployee(string? searchString, int? JobTitleId, int? DepartmentId, int? LocationId, int? ManagerId, IQueryable<Employee> employees)
+        {
+            ViewData["Filtering"] = "btn-outline-secondary";
+            int numberFilters = 0;
+
+            if (DepartmentId.HasValue)
+            {
+                employees = employees.Where(e => e.DepartmentId == DepartmentId);
+                numberFilters++;
+            }
+
+            if (JobTitleId.HasValue)
+            {
+                employees = employees.Where(e => e.JobTitleId == JobTitleId);
+                numberFilters++;
+            }
+            if (ManagerId.HasValue)
+            {
+                employees = employees.Where(e => e.ManagerId == ManagerId);
+                numberFilters++;
+            }
+
+            if (LocationId.HasValue)
+            {
+                //dot any for many-many 
+                employees = employees.Where(l => l.EmployeeLocations.Any(c => c.LocationId == LocationId));
+                numberFilters++;
+            }
+            if ((!string.IsNullOrEmpty(searchString)))
+            {
+                employees = employees.Where(e =>
+                                    e.LastName.ToUpper().Contains(searchString.ToUpper())
+                                    || e.FirstName.ToUpper().Contains(searchString.ToUpper())
+                                    || e.Extension.Contains(searchString.ToUpper())
+                                    || e.PhoneNumber.Contains(searchString.ToUpper())
+                                    || e.Username.ToUpper().Contains(searchString.ToUpper())
+
+                                    );
+                //employees = employees.Where(e => e.SearchKeywords.ToUpper().Contains(searchString.ToUpper()));
+                numberFilters++;
+            }
+
+            if (numberFilters > 0)
+            {
+                ViewData["Filtering"] = " btn-danger ";
+                ViewData["numberFilters"] = "(" + numberFilters.ToString() + " filter" + (numberFilters > 1 ? "s" : "") + " applied)";
+                ViewData["showFilter"] = " show ";
+            }
+
+
+            return employees;
+        }
+
+        private async Task<PaginatedList<Employee>> SortEmployeesAsync(IQueryable<Employee> employees, string sortField, string sortDirection, int? page, int? pageSizeId)
+        {
+            if (sortField == "Employee")
+            {
+                if (sortDirection == "desc")
+                {
+                    employees = employees.OrderByDescending(e => e.LastName).ThenByDescending(e => e.FirstName);
+                }
+                else
+                {
+                    employees = employees.OrderBy(e => e.LastName).ThenBy(e => e.FirstName);
+                }
+            }
+            else if (sortField == "Email")
+            {
+                if (sortDirection == "desc")
+                {
+                    employees = employees.OrderByDescending(e => e.Email);
+                }
+                else
+                {
+                    employees = employees.OrderBy(e => e.Email);
+                }
+            }
+            else if (sortField == "Phone")
+            {
+                if (sortDirection == "desc")
+                {
+                    employees = employees.OrderByDescending(e => e.Extension).ThenByDescending(e => e.PhoneNumber);
+                }
+                else
+                {
+                    employees = employees.OrderBy(e => e.Extension).ThenBy(e => e.PhoneNumber);
+                }
+            }
+            else if (sortField == "Job Title")
+            {
+                if (sortDirection == "desc")
+                {
+                    employees = employees.OrderByDescending(e => e.JobTitle.JobTitleName);
+                }
+                else
+                {
+                    employees = employees.OrderBy(e => e.JobTitle.JobTitleName);
+                }
+            }
+            else if (sortField == "Department")
+            {
+                if (sortDirection == "desc")
+                {
+                    employees = employees.OrderByDescending(e => e.Department.DepartmentName);
+                }
+                else
+                {
+                    employees = employees.OrderBy(e => e.Department.DepartmentName);
+                }
+            }
+            else
+            {
+                employees = employees.OrderByDescending(e => e.LastName).ThenByDescending(e => e.FirstName);
+            }
+
+            //hidden field in Index view to track current sorting, just incase user clicks on same sorting, do the reverse. asc then desc then asc ...
+            ViewData["sortField"] = sortField;
+            ViewData["sortDirection"] = sortDirection;
+
+
+            //pagination
+            int pageSize = PageSizeHelper.SetPageSize(HttpContext, pageSizeId, ControllerName());// CognizantController
+            ViewData["pageSizeId"] = PageSizeHelper.PageSizeList(pageSize);
+            var pagedData = await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), page ?? 1, pageSize);
+
+
+            return pagedData;
+        }
 
 
 

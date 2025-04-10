@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Domain.directory;
 using Infrastructure.dbcontext;
 using mvc.CustomController;
+using Microsoft.AspNetCore.Authorization;
 
 namespace mvc.Controllers;
 
@@ -22,6 +23,7 @@ public class LocationController : ReturnUrlController
     }
 
     // GET: Location/Details/5
+    [Authorize]
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null)
@@ -43,6 +45,7 @@ public class LocationController : ReturnUrlController
 
 
     // GET: Location/Create
+    [Authorize]
     public IActionResult Create()
     {
         return View();
@@ -53,6 +56,7 @@ public class LocationController : ReturnUrlController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize]
     public async Task<IActionResult> Create([Bind("LocationName,SubLocation")] Location location)
     {
         _context.Add(location);
@@ -61,6 +65,7 @@ public class LocationController : ReturnUrlController
 
 
     // GET: Location/Edit/5
+    [Authorize]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -81,6 +86,7 @@ public class LocationController : ReturnUrlController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize]
     public async Task<IActionResult> Edit(int id)
     {
         var locToUpdate = await _context.Locations.FirstOrDefaultAsync(l => l.Id == id);
@@ -100,6 +106,7 @@ public class LocationController : ReturnUrlController
 
 
     // GET: Location/Delete/5
+    [Authorize]
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
@@ -120,6 +127,7 @@ public class LocationController : ReturnUrlController
     // POST: Location/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [Authorize]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var location = await _context.Locations.FindAsync(id);

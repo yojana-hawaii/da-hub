@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Domain.directory;
 using Infrastructure.dbcontext;
 using mvc.CustomController;
+using Microsoft.AspNetCore.Authorization;
 
 namespace mvc.Controllers;
 
@@ -22,6 +23,7 @@ public class JobTitleController : ReturnUrlController
     }
 
     // GET: JobTitle/Details/5
+    [Authorize]
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null)
@@ -41,6 +43,7 @@ public class JobTitleController : ReturnUrlController
     }
 
     // GET: JobTitle/Create
+    [Authorize]
     public IActionResult Create()
     {
         return View();
@@ -51,6 +54,7 @@ public class JobTitleController : ReturnUrlController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize]
     public async Task<IActionResult> Create([Bind("JobTitleName,JobTitleDescription")] JobTitle jobTitle)
     {
         try
@@ -79,6 +83,7 @@ public class JobTitleController : ReturnUrlController
     }
 
     // GET: JobTitle/Edit/5
+    [Authorize]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -99,6 +104,7 @@ public class JobTitleController : ReturnUrlController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize]
     public async Task<IActionResult> Edit(int id)
     {
         var jobToUpdate = await _context.JobTitles.FirstOrDefaultAsync(j => j.Id == id);
@@ -142,6 +148,7 @@ public class JobTitleController : ReturnUrlController
     }
 
     // GET: JobTitle/Delete/5
+    [Authorize]
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
@@ -163,6 +170,7 @@ public class JobTitleController : ReturnUrlController
     // POST: JobTitle/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [Authorize]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var jobTitle = await _context.JobTitles.FirstOrDefaultAsync(j => j.Id == id);

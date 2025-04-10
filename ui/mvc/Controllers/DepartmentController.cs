@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Domain.directory;
 using Infrastructure.dbcontext;
 using mvc.CustomController;
+using Microsoft.AspNetCore.Authorization;
 
 namespace mvc.Controllers;
 
@@ -22,6 +23,7 @@ public class DepartmentController : ReturnUrlController
     }
 
     // GET: Department/Details/5
+    [Authorize]
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null)
@@ -41,6 +43,7 @@ public class DepartmentController : ReturnUrlController
     }
 
     // GET: Department/Create
+    [Authorize]
     public IActionResult Create()
     {
         return View();
@@ -51,6 +54,7 @@ public class DepartmentController : ReturnUrlController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize]
     public async Task<IActionResult> Create([Bind("DepartmentName")] Department department)
     {
         try
@@ -78,6 +82,7 @@ public class DepartmentController : ReturnUrlController
     }
 
     // GET: Department/Edit/5
+    [Authorize]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -98,6 +103,7 @@ public class DepartmentController : ReturnUrlController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize]
     public async Task<IActionResult> Edit(int id)
     {
         var deptToUpdate = await _context.Departments.FirstOrDefaultAsync(d => d.Id == id);
@@ -142,6 +148,7 @@ public class DepartmentController : ReturnUrlController
     }
 
     // GET: Department/Delete/5
+    [Authorize]
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
@@ -163,6 +170,7 @@ public class DepartmentController : ReturnUrlController
     // POST: Department/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [Authorize]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var department = await _context.Departments.FirstOrDefaultAsync(m => m.Id == id);
