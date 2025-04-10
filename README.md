@@ -1,6 +1,6 @@
 # da.hub
 
-##adfs setup - authentication & authorization working, problem with redirection
+## adfs setup - authentication & authorization working, problem with redirection
 * Open AD FS Management
 * create new application group
 * native application - https://localhost:xxxx
@@ -16,3 +16,13 @@
          * SamAccountName - outgoing name
          * Token-Group unqualified name -  Role
    * Client Permissions: select openid
+# App 
+## login
+* display indivdual user details
+* get all direct reports given manager
+* deactivate users without activity in 2 weeks
+* add users to group depending on job title
+* logon script by job title
+* OU by job title
+* which user has logged into which computer. last 365 days??
+
