@@ -36,7 +36,7 @@ public static class PageSizeHelper
             pageSize = Convert.ToInt32(httpContext.Request.Cookies["DefaultpageSizeValue"]);
         }
 
-        return (pageSize == 0) ? 5 : pageSize; // if not cookie and not selection, default 5
+        return (pageSize == 0) ? 20 : pageSize; // if not cookie and not selection, default 5
     }
 
     /// <summary>
