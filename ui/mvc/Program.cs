@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,7 @@ builder.Services.AddDbContext<DirectoryContext>(
         )
     );
 
-//Okta
+//adfs
 builder.Services.AddAuthentication(options =>
 {
     // check if user has authentication cookie
@@ -23,16 +24,21 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
-    .AddCookie()
     .AddOpenIdConnect(options =>
     {
         options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+        //okta
         options.Authority = builder.Configuration["Okta:Domain"];
-        options.RequireHttpsMetadata = true;
         options.ClientId = builder.Configuration["Okta:ClientId"];
         options.ClientSecret = builder.Configuration["Okta:ClientSecret"];
-        //authorization code grant type
-        options.ResponseType = OpenIdConnectResponseType.Code;
+
+        //adfs
+        //options.MetadataAddress = builder.Configuration["federation:address"];
+        //options.ClientId = builder.Configuration["federation:clientId"];
+
+        options.RequireHttpsMetadata = true;
+        options.ResponseType = OpenIdConnectResponseType.Code; //authorization code grant type
         options.GetClaimsFromUserInfoEndpoint = true;
         options.Scope.Clear();
         options.Scope.Add("openid");
@@ -44,10 +50,23 @@ builder.Services.AddAuthentication(options =>
             RoleClaimType = "groups",
             ValidateIssuer = true
         };
+
+        //options.SignInScheme = "Cookies";
+        //// options.ResponseMode = OpenIdConnectResponseMode.FormPost;
+        //options.UsePkce = false;
+    })
+    .AddCookie(options =>
+    {
+        options.AccessDeniedPath = "/";
     });
 
-builder.Services.AddAuthorization();
-
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(
+        "CanAccessAdminArea",
+        policyBuilder => policyBuilder.RequireClaim(ClaimTypes.Role, "dahub-admin")
+        );
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
