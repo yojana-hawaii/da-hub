@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.DirectoryMigration
 {
     [DbContext(typeof(DirectoryContext))]
-    [Migration("20250323200130_InitialEntityMigration")]
+    [Migration("20250411061330_InitialEntityMigration")]
     partial class InitialEntityMigration
     {
         /// <inheritdoc />
@@ -128,6 +128,11 @@ namespace Infrastructure.DirectoryMigration
 
                     b.Property<string>("PhotoPath")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<string>("Username")
                         .IsRequired()
