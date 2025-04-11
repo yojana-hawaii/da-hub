@@ -25,6 +25,9 @@ public class FaxController : ReturnUrlController
             .Include(f => f.Department)
             .Include(f => f.Location)
             .AsNoTracking();
+
+        ViewData["TotalObjects"] = await faxes.CountAsync();
+
         return View(await faxes.ToListAsync());
     }
 

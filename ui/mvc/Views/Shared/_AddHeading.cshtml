@@ -1,8 +1,8 @@
 ﻿@{
     var controller = @ViewBag.ControllerFriendlyName;
 
-   
- 
+
+    var totalEntity = @ViewBag.TotalObjects > 0 ? " - Found " + @ViewBag.TotalObjects : " - None";
 
 
     if(ViewBag.ActionName.ToString() == "Details")
@@ -11,7 +11,7 @@
     }
     else if(ViewData["ActionName"]?.ToString() == "Index")
     {
-        @:<h2>@controller List</h2>
+        @:<h2>@controller List @totalEntity</h2>
     }
     else if (ViewBag.ActionName.ToString() == "Create")
     {

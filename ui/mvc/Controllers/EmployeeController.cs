@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using Microsoft.EntityFrameworkCore.Storage;
 using mvc.CustomController;
 using mvc.Utilities;
@@ -433,7 +432,6 @@ namespace mvc.Controllers
                 employees = employees.Where(e => e.DepartmentId == DepartmentId);
                 numberFilters++;
             }
-
             if (JobTitleId.HasValue)
             {
                 employees = employees.Where(e => e.JobTitleId == JobTitleId);
@@ -444,7 +442,6 @@ namespace mvc.Controllers
                 employees = employees.Where(e => e.ManagerId == ManagerId);
                 numberFilters++;
             }
-
             if (LocationId.HasValue)
             {
                 //dot any for many-many 
@@ -541,7 +538,7 @@ namespace mvc.Controllers
             //hidden field in Index view to track current sorting, just incase user clicks on same sorting, do the reverse. asc then desc then asc ...
             ViewData["sortField"] = sortField;
             ViewData["sortDirection"] = sortDirection;
-
+            ViewData["TotalObjects"] = await employees.CountAsync();
 
             //pagination
             int pageSize = PageSizeHelper.SetPageSize(HttpContext, pageSizeId, ControllerName());// CognizantController
