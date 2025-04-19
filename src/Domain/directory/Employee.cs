@@ -110,6 +110,10 @@ public class Employee : AuditableEntity, IValidatableObject
     [Display(Name = "Locations")]
     public ICollection<EmployeeLocation> EmployeeLocations { get; set; } = new HashSet<EmployeeLocation>();
 
+    [Display(Name = "Documents")]
+    public ICollection<EmployeeDocument> EmployeeDocuments { get; set; } = new HashSet<EmployeeDocument>();
+
+
 
     //Self-Referencing foreign key
     public int? ManagerId { get; set; }
@@ -119,6 +123,7 @@ public class Employee : AuditableEntity, IValidatableObject
     //Two-way self referencing foreign key loop
     [Display(Name = "Direct Reports")]
     public ICollection<Employee> PrimaryStaff { get; set; } = new HashSet<Employee>();
+
 
 
     //IValidation

@@ -38,6 +38,10 @@ public class DirectoryContext : DbContext
     public DbSet<Fax> Faxes { get; set; }
     public DbSet<EmployeeLocation> EmployeeeLocations { get; set; }
 
+    public DbSet<UploadedFile> UploadedFiles { get; set; }
+    //no DbSet for UploadedFileContent > One to one > always created and always belong to UploadedFile
+    public DbSet<EmployeeDocument> EmployeeDocuments { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //apply all fluent api configuration to entity using reflection

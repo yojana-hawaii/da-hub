@@ -37,6 +37,7 @@ namespace mvc.Controllers
                 .Include(e => e.Department)
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
+                .Include(e => e.EmployeeDocuments)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .AsNoTracking();
 
@@ -65,7 +66,7 @@ namespace mvc.Controllers
             return View(paginatedEmployees); // IQuerable executed when ToList is called
         }
 
-        
+
         // GET: Employee/Details/5
         [Authorize]
         public async Task<IActionResult> Details(int? id)
@@ -79,6 +80,7 @@ namespace mvc.Controllers
                 .Include(e => e.Department)
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
+                .Include(e => e.EmployeeDocuments)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -108,7 +110,7 @@ namespace mvc.Controllers
         [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> Create([Bind("Username,Email,FirstName,LastName,Extension,PhoneNumber," +
-                            "AccountCreated,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee, string[] selectedOptions)
+                            "AccountCreated,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee, string[] selectedOptions, List<IFormFile> employeeFiles)
         {
             try
             {
@@ -122,6 +124,7 @@ namespace mvc.Controllers
                 }
                 if (ModelState.IsValid)
                 {
+                    await AddDocumentsAsync(employee, employeeFiles);
                     _context.Add(employee);
                     await _context.SaveChangesAsync();
                     //display change detail instead of going back to index
@@ -167,6 +170,7 @@ namespace mvc.Controllers
                 .Include(e => e.Department)
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
+                .Include(e => e.EmployeeDocuments)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .FirstOrDefaultAsync(e => e.Id == id);
             if (employee == null)
@@ -184,12 +188,13 @@ namespace mvc.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Edit(int id, string[] selectedOptions, Byte[] RowVersion)
+        public async Task<IActionResult> Edit(int id, string[] selectedOptions, Byte[] RowVersion, List<IFormFile> employeeFiles)
         {
             var employeeToUpdate = await _context.Employees
                 .Include(e => e.Department)
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
+                .Include(e => e.EmployeeDocuments)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
@@ -211,6 +216,7 @@ namespace mvc.Controllers
             {
                 try
                 {
+                    await AddDocumentsAsync(employeeToUpdate, employeeFiles);
                     await _context.SaveChangesAsync();
                     //display change detail instead of going back to index
                     return RedirectToAction("Details", new { employeeToUpdate.Id });
@@ -352,6 +358,7 @@ namespace mvc.Controllers
                 .Include(e => e.Department)
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
+                .Include(e => e.EmployeeDocuments)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .FirstOrDefaultAsync(m => m.Id == id); //FindAsync faster but only works with one entity.
             if (employee == null)
@@ -372,6 +379,7 @@ namespace mvc.Controllers
                 .Include(e => e.Department)
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
+                .Include(e => e.EmployeeDocuments)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
@@ -406,6 +414,21 @@ namespace mvc.Controllers
 
         }
 
+        public async Task<FileContentResult> Download(int id)
+        {
+            var uploadedFile = await _context.UploadedFiles
+                .Include(d => d.UploadedFileContent)
+                .Where(d => d.Id == id)
+                .FirstOrDefaultAsync();
+
+            if (uploadedFile?.UploadedFileContent?.Content == null || uploadedFile.MimeType == null)
+            {
+                return new FileContentResult(Array.Empty<byte>(), "application/octet-stream");
+            }
+
+            return File(uploadedFile.UploadedFileContent.Content, uploadedFile.MimeType, uploadedFile.FileName);
+        }
+
         private IActionResult RedirectToIndexAfterSaveChanges()
         {
             var returnUrl = ViewData["returnUrl"]?.ToString();
@@ -419,6 +442,34 @@ namespace mvc.Controllers
         private bool EmployeeExists(int id)
         {
             return _context.Employees.Any(e => e.Id == id);
+        }
+
+
+        private async Task AddDocumentsAsync(Employee employee, List<IFormFile> uploadedFiles)
+        {
+            foreach (var uploadedFile in uploadedFiles)
+            {
+                if (uploadedFile != null)
+                {
+                    string mimeType = uploadedFile.ContentType;
+                    string fileName = Path.GetFileName(uploadedFile.FileName);
+                    long fileLength = uploadedFile.Length;
+
+                    // additional file type filter example only excel allowed. Skip that for now. Allow anything
+                    if (!(fileName == "" || fileLength == 0))
+                    {
+                        EmployeeDocument document = new EmployeeDocument();
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await uploadedFile.CopyToAsync(memoryStream);
+                            document.UploadedFileContent.Content = memoryStream.ToArray();
+                        }
+                        document.MimeType = mimeType;
+                        document.FileName = fileName;
+                        employee.EmployeeDocuments.Add(document);
+                    }
+                }
+            }
         }
 
         //filter and pagination

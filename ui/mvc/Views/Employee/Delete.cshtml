@@ -89,6 +89,41 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Manager.Summary)
         </dd>
+        
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(m => m.EmployeeDocuments)
+        </dt>
+        <dd class="col-sm-10">
+            @{
+                int fileCount = Model.EmployeeDocuments.Count;
+                if (fileCount > 0)
+                {
+                    var firstFile = Model.EmployeeDocuments.FirstOrDefault();
+                    if (fileCount > 1)
+                    {
+                        <a class="" role="button" data-bs-toggle="collapse"
+                           href="#collapseDocs@(Model.Id)" aria-expanded="false"
+                           aria-controls="collapseDocs@(Model.Id)">
+                            <span class="badge bg-info">@fileCount</span> Current Documents...
+                        </a>
+                        <div class="collapse" id="collapseDocs@(Model.Id)">
+                            @{
+                                foreach (var doc in Model.EmployeeDocuments)
+                                {
+                                    <a asp-action="Download" asp-route-id="@doc.Id">@doc.FileName</a> <br />
+                                }
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-action="Download" asp-route-id="@firstFile?.Id">@firstFile?.FileName</a>
+                    }
+                }
+            }
+        </dd>
+
+        
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.EmployeeLocations)
         </dt>

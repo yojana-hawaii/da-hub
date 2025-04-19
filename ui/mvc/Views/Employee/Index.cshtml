@@ -73,6 +73,9 @@
                 <th class="d-none d-lg-table-cell">
                     <input type="submit" name="" value="Location" class="btn btn-toolbar" />
                 </th>
+                <th class="d-none d-lg-table-cell">
+                    <input type="submit" name="" value="Document" class="btn btn-toolbar" />
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -136,6 +139,35 @@
                                 else
                                 {
                                     @firstLocation
+                                }
+                            }
+                        }
+                    </td>
+                    <td class="d-none d-lg-table-cell">
+                        @{
+                            int fileCount = item.EmployeeDocuments.Count;
+                            if (fileCount > 0)
+                            {
+                                var firstFile = item.EmployeeDocuments.FirstOrDefault();
+                                if (fileCount > 1)
+                                {
+                                    <a class="" role="button" data-bs-toggle="collapse"
+                                       href="#collapseDocs@(item.Id)" aria-expanded="false"
+                                       aria-controls="collapseDocs@(item.Id)">
+                                        <span class="badge bg-info">@fileCount</span> Current Documents...
+                                    </a>
+                                    <div class="collapse" id="collapseDocs@(item.Id)">
+                                        @{
+                                            foreach (var doc in item.EmployeeDocuments)
+                                            {
+                                                <a asp-action="Download" asp-route-id="@doc.Id">@doc.FileName</a> <br />
+                                            }
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <a asp-action="Download" asp-route-id="@firstFile?.Id">@firstFile?.FileName</a>
                                 }
                             }
                         }
