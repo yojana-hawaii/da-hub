@@ -42,6 +42,9 @@ public class DirectoryContext : DbContext
     //no DbSet for UploadedFileContent > One to one > always created and always belong to UploadedFile
     public DbSet<EmployeeDocument> EmployeeDocuments { get; set; }
 
+    public DbSet<EmployeePhoto> EmployeePhotos { get; set; }
+    public DbSet<EmployeeThumbnail> EmployeeThumbnails { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //apply all fluent api configuration to entity using reflection

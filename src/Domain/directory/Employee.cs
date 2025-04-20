@@ -88,7 +88,6 @@ public class Employee : AuditableEntity, IValidatableObject
     [MaxLength(20)]
     [Display(Name = "Employee Number")]
     public string? EmployeeNumber { get; set; }
-    public string? PhotoPath { get; set; }
 
 
     //for concurrenct
@@ -113,6 +112,9 @@ public class Employee : AuditableEntity, IValidatableObject
     [Display(Name = "Documents")]
     public ICollection<EmployeeDocument> EmployeeDocuments { get; set; } = new HashSet<EmployeeDocument>();
 
+    //one-one 
+    public EmployeePhoto? EmployeePhoto { get; set; }
+    public EmployeeThumbnail? EmployeeThumbnail { get; set; }
 
 
     //Self-Referencing foreign key

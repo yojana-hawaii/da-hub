@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.DirectoryMigration
 {
     [DbContext(typeof(DirectoryContext))]
-    [Migration("20250419040713_EmployeeDocs")]
-    partial class EmployeeDocs
+    [Migration("20250420203026_InitialEntityMigration")]
+    partial class InitialEntityMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -126,9 +126,6 @@ namespace Infrastructure.DirectoryMigration
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhotoPath")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -181,6 +178,58 @@ namespace Infrastructure.DirectoryMigration
                     b.HasIndex("LocationId");
 
                     b.ToTable("EmployeeeLocations");
+                });
+
+            modelBuilder.Entity("Domain.directory.EmployeePhoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<byte[]>("Content")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MimeType")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId")
+                        .IsUnique();
+
+                    b.ToTable("EmployeePhotos");
+                });
+
+            modelBuilder.Entity("Domain.directory.EmployeeThumbnail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<byte[]>("Content")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MimeType")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId")
+                        .IsUnique();
+
+                    b.ToTable("EmployeeThumbnails");
                 });
 
             modelBuilder.Entity("Domain.directory.Fax", b =>
@@ -432,6 +481,28 @@ namespace Infrastructure.DirectoryMigration
                     b.Navigation("Location");
                 });
 
+            modelBuilder.Entity("Domain.directory.EmployeePhoto", b =>
+                {
+                    b.HasOne("Domain.directory.Employee", "Emmployee")
+                        .WithOne("EmployeePhoto")
+                        .HasForeignKey("Domain.directory.EmployeePhoto", "EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Emmployee");
+                });
+
+            modelBuilder.Entity("Domain.directory.EmployeeThumbnail", b =>
+                {
+                    b.HasOne("Domain.directory.Employee", "Emmployee")
+                        .WithOne("EmployeeThumbnail")
+                        .HasForeignKey("Domain.directory.EmployeeThumbnail", "EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Emmployee");
+                });
+
             modelBuilder.Entity("Domain.directory.Fax", b =>
                 {
                     b.HasOne("Domain.directory.Department", "Department")
@@ -496,6 +567,10 @@ namespace Infrastructure.DirectoryMigration
                     b.Navigation("EmployeeDocuments");
 
                     b.Navigation("EmployeeLocations");
+
+                    b.Navigation("EmployeePhoto");
+
+                    b.Navigation("EmployeeThumbnail");
 
                     b.Navigation("PrimaryStaff");
                 });

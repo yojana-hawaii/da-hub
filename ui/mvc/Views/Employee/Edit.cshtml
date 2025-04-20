@@ -5,10 +5,37 @@
 <partial name="_AddHeading" />
 
 <hr />
+@{
+    var hasPicture = (Model.EmployeePhoto?.Content != null);
+    if (hasPicture)
+    {
+        @:<div>
+        string imageBase64 = Convert.ToBase64String(Model.EmployeePhoto.Content);
+        string imageSrc = string.Format("data:" + Model.EmployeePhoto.MimeType + ";base64,{0}", imageBase64);
+        <img src="@imageSrc" alt="Profile Picture of @Model.Summary"
+        title="Profile Picture of @Model.Summary class="img-fluid rounded" />
+        @:</div>
+    }
+}
 <form asp-action="Edit" method="post" enctype="multipart/form-data">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="RowVersion" />
+    <div>
+        @{
+            if (hasPicture)
+            {
+                <div class="row">
+                    <div class="form-check m-3">
+                        <input class="form-check-input" type="checkbox" id="removeImage" name="removeImage" />
+                        <label class="form-check-label" for="removeImage">
+                            <strong>Check to remove Image</strong>
+                        </label>
+                    </div>
+                </div>
+            }
+        }
+    </div>
     <div class="row">
         <div class="col-md-3">
             <div class="form-group">
@@ -79,12 +106,7 @@
                     }
                 </div>
             </div>
-            <div class="form-group">
-                <label class="control-label control-file-label">Upload Additional Documents</label>
-                <div class="input-group mb-3">
-                    <input type="file" class="form-control" name="employeeFiles" multiple="multiple" />
-                </div>
-            </div>
+            
         </div>
         <div class="col-md-3">
             <div class="form-group">
@@ -101,11 +123,6 @@
                 <label asp-for="EmployeeNumber" class="control-label"></label>
                 <input asp-for="EmployeeNumber" class="form-control" />
                 <span asp-validation-for="EmployeeNumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PhotoPath" class="control-label"></label>
-                <input asp-for="PhotoPath" class="form-control" />
-                <span asp-validation-for="PhotoPath" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="JobTitle" class="control-label"></label>
@@ -127,6 +144,18 @@
                     <option value=""></option>
                 </select>
                 <span asp-validation-for="ManagerId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label control-file-label">Upload Additional Documents</label>
+                <div class="input-group mb-3">
+                    <input type="file" class="form-control" name="employeeFiles" multiple="multiple" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label control-file-label">Upload Photo</label>
+                <div class="input-group mb-3">
+                    <input type="file" class="form-control" name="employeePhoto" id="employeePhoto" />
+                </div>
             </div>
         </div>
         <div class="col-md-6">

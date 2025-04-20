@@ -5,6 +5,15 @@
 <div>
     <partial name="_AddHeading" />
     <hr />
+    @{
+        if(Model.EmployeePhoto?.Content != null)
+        {
+            string imageBase64 = Convert.ToBase64String(Model.EmployeePhoto.Content);
+            string imageSrc = string.Format("data:" + Model.EmployeePhoto.MimeType + ";base64,{0}", imageBase64);
+            <img src="@imageSrc" alt="Profile Picture of @Model?.Summary"
+                 title="Profile Picture of @Model?.Summary class="img-fluid rounded" />
+        }
+    }
     <dl class="row">
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Username)
@@ -65,12 +74,6 @@
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.EmployeeNumber)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.PhotoPath)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.PhotoPath)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.JobTitle)

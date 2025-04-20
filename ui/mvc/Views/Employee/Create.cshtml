@@ -44,12 +44,6 @@
                     <input asp-for="PhoneNumber" class="form-control" />
                     <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label class="control-label control-file-label">Upload Documents</label>
-                    <div class="input-group mb-3">
-                        <input type="file" class="form-control" name="employeeFiles" multiple="multiple" />
-                    </div>
-                </div>
                 
                 
         </div>
@@ -68,11 +62,6 @@
                     <label asp-for="EmployeeNumber" class="control-label"></label>
                     <input asp-for="EmployeeNumber" class="form-control" />
                     <span asp-validation-for="EmployeeNumber" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="PhotoPath" class="control-label"></label>
-                    <input asp-for="PhotoPath" class="form-control" />
-                    <span asp-validation-for="PhotoPath" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="JobTitle" class="control-label"></label>
@@ -127,7 +116,20 @@
                         </table>
                     </div>
                 </div>
+                
+                <div class="form-group">
+                    <label class="control-label control-file-label">Upload Documents</label>
+                    <div class="input-group mb-3">
+                        <input type="file" class="form-control" name="employeeFiles" id="employeeFiles" multiple="multiple" />
+                    </div>
+                </div>
 
+                <div class="form-group">
+                    <label class="control-label control-file-label">Upload Photo</label>
+                    <div class="input-group mb-3">
+                        <input type="file" class="form-control" name="employeePhoto" id="employeePhoto" />
+                    </div>
+                </div>
         </div>
     </div>
     <div class="form-group">

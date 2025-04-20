@@ -81,7 +81,6 @@ namespace Infrastructure.DirectoryMigration
                     HireDate = table.Column<DateOnly>(type: "date", nullable: true),
                     Nickname = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EmployeeNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    PhotoPath = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     JobTitleId = table.Column<int>(type: "int", nullable: true),
                     DepartmentId = table.Column<int>(type: "int", nullable: true),
@@ -178,6 +177,95 @@ namespace Infrastructure.DirectoryMigration
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "EmployeePhotos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Content = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    MimeType = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeePhotos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmployeePhotos_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmployeeThumbnails",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Content = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    MimeType = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeeThumbnails", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmployeeThumbnails_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UploadedFiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    MimeType = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true),
+                    EmployeeId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UploadedFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UploadedFiles_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UploadedFiles_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UploadedFileContent",
+                columns: table => new
+                {
+                    FileContentId = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<byte[]>(type: "varbinary(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UploadedFileContent", x => x.FileContentId);
+                    table.ForeignKey(
+                        name: "FK_UploadedFileContent_UploadedFiles_FileContentId",
+                        column: x => x.FileContentId,
+                        principalTable: "UploadedFiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Departments_DepartmentName",
                 table: "Departments",
@@ -188,6 +276,12 @@ namespace Infrastructure.DirectoryMigration
                 name: "IX_EmployeeeLocations_LocationId",
                 table: "EmployeeeLocations",
                 column: "LocationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeePhotos_EmployeeId",
+                table: "EmployeePhotos",
+                column: "EmployeeId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Employees_DepartmentId",
@@ -203,6 +297,12 @@ namespace Infrastructure.DirectoryMigration
                 name: "IX_Employees_ManagerId",
                 table: "Employees",
                 column: "ManagerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeThumbnails_EmployeeId",
+                table: "EmployeeThumbnails",
+                column: "EmployeeId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Faxes_DepartmentId",
@@ -231,6 +331,16 @@ namespace Infrastructure.DirectoryMigration
                 table: "Locations",
                 columns: new[] { "LocationName", "ComputedSubLocationForUniqueness" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UploadedFiles_DepartmentId",
+                table: "UploadedFiles",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UploadedFiles_EmployeeId",
+                table: "UploadedFiles",
+                column: "EmployeeId");
         }
 
         /// <inheritdoc />
@@ -240,13 +350,25 @@ namespace Infrastructure.DirectoryMigration
                 name: "EmployeeeLocations");
 
             migrationBuilder.DropTable(
+                name: "EmployeePhotos");
+
+            migrationBuilder.DropTable(
+                name: "EmployeeThumbnails");
+
+            migrationBuilder.DropTable(
                 name: "Faxes");
 
             migrationBuilder.DropTable(
-                name: "Employees");
+                name: "UploadedFileContent");
 
             migrationBuilder.DropTable(
                 name: "Locations");
+
+            migrationBuilder.DropTable(
+                name: "UploadedFiles");
+
+            migrationBuilder.DropTable(
+                name: "Employees");
 
             migrationBuilder.DropTable(
                 name: "Departments");

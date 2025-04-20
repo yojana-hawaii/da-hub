@@ -38,6 +38,7 @@ namespace mvc.Controllers
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
                 .Include(e => e.EmployeeDocuments)
+                .Include(e => e.EmployeeThumbnail)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .AsNoTracking();
 
@@ -81,6 +82,7 @@ namespace mvc.Controllers
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
                 .Include(e => e.EmployeeDocuments)
+                .Include(e => e.EmployeePhoto)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -110,7 +112,8 @@ namespace mvc.Controllers
         [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> Create([Bind("Username,Email,FirstName,LastName,Extension,PhoneNumber," +
-                            "AccountCreated,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee, string[] selectedOptions, List<IFormFile> employeeFiles)
+                            "AccountCreated,NickName,EmployeeNumber,PhotoPath,JobTitleId,DepartmentId,ManagerId")] Employee employee,
+            string[] selectedOptions, List<IFormFile>? employeeFiles, IFormFile? employeePhoto)
         {
             try
             {
@@ -124,6 +127,7 @@ namespace mvc.Controllers
                 }
                 if (ModelState.IsValid)
                 {
+                    await AddPictureAsync(employee, employeePhoto);
                     await AddDocumentsAsync(employee, employeeFiles);
                     _context.Add(employee);
                     await _context.SaveChangesAsync();
@@ -171,6 +175,7 @@ namespace mvc.Controllers
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
                 .Include(e => e.EmployeeDocuments)
+                .Include(e => e.EmployeePhoto)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .FirstOrDefaultAsync(e => e.Id == id);
             if (employee == null)
@@ -188,13 +193,15 @@ namespace mvc.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Edit(int id, string[] selectedOptions, Byte[] RowVersion, List<IFormFile> employeeFiles)
+        public async Task<IActionResult> Edit(int id, string[] selectedOptions, Byte[] RowVersion,
+            List<IFormFile>? employeeFiles, string? removeImage, IFormFile? employeePhoto)
         {
             var employeeToUpdate = await _context.Employees
                 .Include(e => e.Department)
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
                 .Include(e => e.EmployeeDocuments)
+                .Include(e => e.EmployeePhoto)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
@@ -211,11 +218,25 @@ namespace mvc.Controllers
 
             if (await TryUpdateModelAsync<Employee>(employeeToUpdate, "",
                     e => e.Username, e => e.Email, e => e.LastName, e => e.FirstName, e => e.AccountCreated, e => e.Extension,
-                    e => e.PhoneNumber, e => e.HireDate, e => e.Nickname, e => e.EmployeeNumber, e => e.PhotoPath,
+                    e => e.PhoneNumber, e => e.HireDate, e => e.Nickname, e => e.EmployeeNumber,
                     e => e.JobTitleId, e => e.DepartmentId, e => e.ManagerId))
             {
                 try
                 {
+                    if (removeImage != null)
+                    {
+                        //make sure EF change tracker knows about thumbnails as well
+                        employeeToUpdate.EmployeeThumbnail = _context.EmployeeThumbnails.Where(t => t.EmployeeId == id).FirstOrDefault();
+
+                        //delete from database
+                        employeeToUpdate.EmployeePhoto = null;
+                        employeeToUpdate.EmployeeThumbnail = null;
+                    }
+                    else
+                    {
+                        await AddPictureAsync(employeeToUpdate, employeePhoto);
+                    }
+
                     await AddDocumentsAsync(employeeToUpdate, employeeFiles);
                     await _context.SaveChangesAsync();
                     //display change detail instead of going back to index
@@ -258,11 +279,6 @@ namespace mvc.Controllers
 
                         if (databaseValue.EmployeeNumber != clientValues.EmployeeNumber)
                             ModelState.AddModelError("EmployeeNumber", "Curent Value: " + databaseValue.EmployeeNumber);
-
-                        if (databaseValue.PhotoPath != clientValues.PhotoPath)
-                            ModelState.AddModelError("PhotoPath", "Curent Value: " + databaseValue.PhotoPath);
-
-
 
                         if (databaseValue.AccountCreated != clientValues.AccountCreated)
                             ModelState.AddModelError("AccountCreated", "Curent Value: " + String.Format("{0:d}", databaseValue.AccountCreated));
@@ -359,6 +375,7 @@ namespace mvc.Controllers
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
                 .Include(e => e.EmployeeDocuments)
+                .Include(e => e.EmployeePhoto)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .FirstOrDefaultAsync(m => m.Id == id); //FindAsync faster but only works with one entity.
             if (employee == null)
@@ -380,6 +397,7 @@ namespace mvc.Controllers
                 .Include(e => e.JobTitle)
                 .Include(e => e.Manager)
                 .Include(e => e.EmployeeDocuments)
+                .Include(e => e.EmployeePhoto)
                 .Include(e => e.EmployeeLocations).ThenInclude(el => el.Location)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
@@ -444,6 +462,57 @@ namespace mvc.Controllers
             return _context.Employees.Any(e => e.Id == id);
         }
 
+
+        // uploaded files and photos
+        // save in two different sizes
+        private async Task AddPictureAsync(Employee employee, IFormFile uploadedPicture)
+        {
+            if (uploadedPicture != null)
+            {
+                string mimeType = uploadedPicture.ContentType;
+                long fileLength = uploadedPicture.Length;
+
+                if (!(mimeType == "" || fileLength == 0)) // make sure non empty file is uploaded
+                {
+                    if (mimeType.Contains("image")) // has to br image not any other type of file
+                    {
+                        using var memoryStream = new MemoryStream();
+                        await uploadedPicture.CopyToAsync(memoryStream);
+                        var pictureArray = memoryStream.ToArray();
+
+                        //check if add new or replace existing
+                        if (employee.EmployeePhoto != null)
+                        {
+                            // picture already exists, just replace
+                            employee.EmployeePhoto.Content = ResizeImage.ShrinkImageWebp(pictureArray, 500, 600);
+
+                            employee.EmployeeThumbnail = _context.EmployeeThumbnails.Where(e => e.EmployeeId == employee.Id).FirstOrDefault();
+
+                            if (employee.EmployeeThumbnail != null)
+                            {
+                                employee.EmployeeThumbnail.Content = ResizeImage.ShrinkImageWebp(pictureArray, 75, 90);
+                            }
+                        }
+                        else
+                        {
+                            // no picture, adding new
+                            employee.EmployeePhoto = new EmployeePhoto
+                            {
+                                Content = ResizeImage.ShrinkImageWebp(pictureArray, 500, 600),
+                                MimeType = "image/webp"
+                            };
+
+                            employee.EmployeeThumbnail = new EmployeeThumbnail
+                            {
+                                Content = ResizeImage.ShrinkImageWebp(pictureArray, 75, 90),
+                                MimeType = "image/webp"
+                            };
+                        }
+
+                    }
+                }
+            }
+        }
 
         private async Task AddDocumentsAsync(Employee employee, List<IFormFile> uploadedFiles)
         {
