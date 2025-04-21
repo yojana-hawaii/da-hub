@@ -18,4 +18,8 @@ public class Department : AuditableEntity
 
     public ICollection<Employee> Employees { get; set; } = new HashSet<Employee>();
     public ICollection<Fax> Faxes { get; set; } = new HashSet<Fax>();
+
+    [Display(Name = "Documents")]
+    public ICollection<DepartmentDocument> DepartmentDocuments { get; set; } = new HashSet<DepartmentDocument>();
+
 }

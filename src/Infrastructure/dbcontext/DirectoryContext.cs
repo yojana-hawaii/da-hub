@@ -41,6 +41,7 @@ public class DirectoryContext : DbContext
     public DbSet<UploadedFile> UploadedFiles { get; set; }
     //no DbSet for UploadedFileContent > One to one > always created and always belong to UploadedFile
     public DbSet<EmployeeDocument> EmployeeDocuments { get; set; }
+    public DbSet<DepartmentDocument> DepartmentDocuments { get; set; }
 
     public DbSet<EmployeePhoto> EmployeePhotos { get; set; }
     public DbSet<EmployeeThumbnail> EmployeeThumbnails { get; set; }
