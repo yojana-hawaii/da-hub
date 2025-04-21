@@ -15,5 +15,5 @@ public class EmployeePhoto
     public string? MimeType { get; set; }
 
     public int EmployeeId { get; set; }
-    public Employee? Emmployee { get; set; }
+    public Employee? Employee { get; set; }
 }
