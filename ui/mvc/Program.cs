@@ -93,7 +93,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Employee}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 //to prepare the database and seed data. 
 using (var scope = app.Services.CreateScope())
