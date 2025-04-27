@@ -27,7 +27,7 @@ public static class DirectoryInitializer
             if (DeleteDatabase || !_context.Database.CanConnect())
             {
                 _context.Database.EnsureDeleted(); //delete if exists
-                if(UseMigrations)
+                if (UseMigrations)
                 {
                     _context.Database.Migrate(); // create database and apply all migration
                 }
@@ -100,7 +100,7 @@ public static class DirectoryInitializer
         #endregion
     }
 
-
+    
 
     private static void SeedEmployeeLocation(DirectoryContext context, Random rnd)
     {

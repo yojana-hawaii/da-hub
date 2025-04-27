@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.DirectoryMigration
 {
     [DbContext(typeof(DirectoryContext))]
-    [Migration("20250420203026_InitialEntityMigration")]
-    partial class InitialEntityMigration
+    [Migration("20250427045457_DirectoryEntityMigration")]
+    partial class DirectoryEntityMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -394,6 +394,8 @@ namespace Infrastructure.DirectoryMigration
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FileName");
+
                     b.ToTable("UploadedFiles");
 
                     b.HasDiscriminator().HasValue("UploadedFile");
@@ -483,24 +485,24 @@ namespace Infrastructure.DirectoryMigration
 
             modelBuilder.Entity("Domain.directory.EmployeePhoto", b =>
                 {
-                    b.HasOne("Domain.directory.Employee", "Emmployee")
+                    b.HasOne("Domain.directory.Employee", "Employee")
                         .WithOne("EmployeePhoto")
                         .HasForeignKey("Domain.directory.EmployeePhoto", "EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Emmployee");
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("Domain.directory.EmployeeThumbnail", b =>
                 {
-                    b.HasOne("Domain.directory.Employee", "Emmployee")
+                    b.HasOne("Domain.directory.Employee", "Employee")
                         .WithOne("EmployeeThumbnail")
                         .HasForeignKey("Domain.directory.EmployeeThumbnail", "EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Emmployee");
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("Domain.directory.Fax", b =>

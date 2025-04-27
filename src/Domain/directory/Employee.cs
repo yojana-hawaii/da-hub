@@ -9,6 +9,9 @@ public class Employee : AuditableEntity, IValidatableObject
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
+
+    #region Summary
+
     [Display(Name = "Name")]
     public string Summary
     {
@@ -48,7 +51,9 @@ public class Employee : AuditableEntity, IValidatableObject
         }
     }
 
+    #endregion
 
+    #region LDAP Properties
     // from AD - can't modify
     [StringLength(100, ErrorMessage = "{0} cannot exceed {1} characters")]
     [Required(ErrorMessage = "Cannot leave {0} blank")]
@@ -71,7 +76,9 @@ public class Employee : AuditableEntity, IValidatableObject
     [Display(Name = "Created")]
     public DateTime AccountCreated { get; set; }
 
+    #endregion
 
+    #region Remaining Properties
     //from AD but modify from webapp
     [StringLength(5, ErrorMessage = "{0} cannot exceed {1} characters")]
     public string? Extension { get; set; }
@@ -89,15 +96,17 @@ public class Employee : AuditableEntity, IValidatableObject
     [Display(Name = "Employee Number")]
     public string? EmployeeNumber { get; set; }
 
+    #endregion
 
-    //for concurrenct
+    //manage concurrency
     [ScaffoldColumn(false)]
     [Timestamp]
     public Byte[]? RowVersion { get; set; }
 
 
+    #region Foreign Key
 
-    //Foreign key
+    //one-many nullable foreign key
     public int? JobTitleId { get; set; }
     [Display(Name = "Job Title")]
     public JobTitle? JobTitle { get; set; }
@@ -105,14 +114,18 @@ public class Employee : AuditableEntity, IValidatableObject
     public int? DepartmentId { get; set; }
     public Department? Department { get; set; }
 
-    //many to many with location
+
+
+    //many-many foreign key with Junction table
     [Display(Name = "Locations")]
     public ICollection<EmployeeLocation> EmployeeLocations { get; set; } = new HashSet<EmployeeLocation>();
 
     [Display(Name = "Documents")]
     public ICollection<EmployeeDocument> EmployeeDocuments { get; set; } = new HashSet<EmployeeDocument>();
 
-    //one-one 
+
+
+    //one-one foreign key
     public EmployeePhoto? EmployeePhoto { get; set; }
     public EmployeeThumbnail? EmployeeThumbnail { get; set; }
 
@@ -126,6 +139,7 @@ public class Employee : AuditableEntity, IValidatableObject
     [Display(Name = "Direct Reports")]
     public ICollection<Employee> PrimaryStaff { get; set; } = new HashSet<Employee>();
 
+    #endregion
 
 
     //IValidation

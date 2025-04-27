@@ -391,6 +391,8 @@ namespace Infrastructure.DirectoryMigration
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FileName");
+
                     b.ToTable("UploadedFiles");
 
                     b.HasDiscriminator().HasValue("UploadedFile");
@@ -480,24 +482,24 @@ namespace Infrastructure.DirectoryMigration
 
             modelBuilder.Entity("Domain.directory.EmployeePhoto", b =>
                 {
-                    b.HasOne("Domain.directory.Employee", "Emmployee")
+                    b.HasOne("Domain.directory.Employee", "Employee")
                         .WithOne("EmployeePhoto")
                         .HasForeignKey("Domain.directory.EmployeePhoto", "EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Emmployee");
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("Domain.directory.EmployeeThumbnail", b =>
                 {
-                    b.HasOne("Domain.directory.Employee", "Emmployee")
+                    b.HasOne("Domain.directory.Employee", "Employee")
                         .WithOne("EmployeeThumbnail")
                         .HasForeignKey("Domain.directory.EmployeeThumbnail", "EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Emmployee");
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("Domain.directory.Fax", b =>

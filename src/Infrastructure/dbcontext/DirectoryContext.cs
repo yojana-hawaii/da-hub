@@ -27,7 +27,7 @@ public class DirectoryContext : DbContext
     public DirectoryContext(DbContextOptions<DirectoryContext> options) : base(options)
     {
         _httpContextAccessor = null;
-        LoggedInUser = "seed-data-base-consstructor";
+        LoggedInUser = "seed-data-base-constructor";
     }
 
 

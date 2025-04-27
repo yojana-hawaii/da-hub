@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.DirectoryMigration
 {
     /// <inheritdoc />
-    public partial class InitialEntityMigration : Migration
+    public partial class DirectoryEntityMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -341,6 +341,11 @@ namespace Infrastructure.DirectoryMigration
                 name: "IX_UploadedFiles_EmployeeId",
                 table: "UploadedFiles",
                 column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UploadedFiles_FileName",
+                table: "UploadedFiles",
+                column: "FileName");
         }
 
         /// <inheritdoc />
