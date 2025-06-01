@@ -6,17 +6,25 @@ namespace mvc.Controllers;
 
 public class AccountController : Controller
 {
-    public IActionResult Login()
+    public IActionResult Login([FromQuery] string returnUrl)
     {
+        var redirectUri = returnUrl is null ? Url.Content("~/") : "/" + returnUrl;
         if (!HttpContext.User.Identity.IsAuthenticated)
         {
             return Challenge(OpenIdConnectDefaults.AuthenticationScheme);
         }
-        return RedirectToAction("Index", "Fax");
+        return LocalRedirect(redirectUri);
     }
 
-    public IActionResult Logout()
+    public IActionResult Logout([FromQuery] string returnUrl)
     {
+        var redirectUri = returnUrl is null ? Url.Content("~/") : "/" + returnUrl;
+
+        if (!User.Identity.IsAuthenticated)
+        {
+            return LocalRedirect(redirectUri);
+        }
+
         return new SignOutResult(
             new[]
             {
