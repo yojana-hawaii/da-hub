@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace mvc.Controllers;
 
+[Authorize]
 public class FaxController : ReturnUrlController
 {
     private readonly DirectoryContext _context;
@@ -19,6 +20,7 @@ public class FaxController : ReturnUrlController
     }
 
     // GET: Fax
+    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
         var faxes = _context.Faxes
@@ -32,7 +34,6 @@ public class FaxController : ReturnUrlController
     }
 
     // GET: Fax/Details/5
-    [Authorize]
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null)
@@ -54,7 +55,6 @@ public class FaxController : ReturnUrlController
     }
 
     // GET: Fax/Create
-    [Authorize]
     public IActionResult Create()
     {
         PopulateDropdownList();
@@ -66,7 +66,6 @@ public class FaxController : ReturnUrlController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize]
     public async Task<IActionResult> Create([Bind("FaxName,FaxNumber,IsForwarded,ForwardTo,LocationId,DepartmentId")] Fax fax)
     {
         try
@@ -100,7 +99,6 @@ public class FaxController : ReturnUrlController
     }
 
     // GET: Fax/Edit/5
-    [Authorize]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -122,7 +120,6 @@ public class FaxController : ReturnUrlController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize]
     public async Task<IActionResult> Edit(int id)
     {
         var faxToUpdate = await _context.Faxes.FirstOrDefaultAsync(f => f.Id == id);
@@ -171,7 +168,6 @@ public class FaxController : ReturnUrlController
     }
 
     // GET: Fax/Delete/5
-    [Authorize]
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
@@ -195,7 +191,6 @@ public class FaxController : ReturnUrlController
     // POST: Fax/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    [Authorize]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var fax = await _context.Faxes
