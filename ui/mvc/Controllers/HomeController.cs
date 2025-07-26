@@ -1,12 +1,13 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using mvc.CustomController;
 using mvc.Models;
+using System.Diagnostics;
 
 namespace mvc.Controllers;
 
-[Authorize]
-public class HomeController : Controller
+[AllowAnonymous]
+public class HomeController : ReturnUrlController
 {
     private readonly ILogger<HomeController> _logger;
 
