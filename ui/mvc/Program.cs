@@ -6,11 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<DirectoryContext>(
     options => options.UseSqlServer(
-        //builder.Configuration.GetConnectionString("DaHubProd") //production
-        builder.Configuration.GetConnectionString("DaHubDev") //development
+        builder.Configuration.GetConnectionString("DaHubProd") //production
+        //builder.Configuration.GetConnectionString("DaHubDev") //development
         )
     );
-
 
 
 // Add services to the container.
@@ -38,13 +37,13 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Employee}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 //to prepare the database and seed data. 
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    DirectoryInitializer.Initialize(serviceProvider: services, DeleteDatabase: false, UseMigrations: true, SeedSampleData: false);
+    DirectoryInitializer.Initialize(serviceProvider: services, DeleteDatabase: false, UseMigrations: false, SeedSampleData: false);
 }
 
 app.Run();

@@ -64,7 +64,7 @@ public class CognizantController : Controller
         ViewData["ActionName"] = ActionName();
 
         
-        var title = (ActionName() == "Index" ? ControllerName() + "s" : ( ActionName() == "Details" ? ControllerName() + " " + ActionName() : ActionName() + " " + ControllerName() ) );
+        var title = (ActionName() == "Index" ? ControllerName() : ( ActionName() == "Details" ? ControllerName() + " " + ActionName() : ActionName() + " " + ControllerName() ) );
         ViewData["Title"] = title;
     }
 
