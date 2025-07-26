@@ -2,7 +2,7 @@
 
 <partial name="_AddHeading" />
 
-<form asp-controller="Employee" asp-action="Index" method="get">
+<form asp-controller="Directory" asp-action="Index" method="get">
     @* hidden inputs to keep track of last sort direction & sort field *@
     <input type="hidden" name="sortDirection" value="@ViewData["sortDirection"]" />
     <input type="hidden" name="sortField" value="@ViewData["sortField"]" />
@@ -74,10 +74,10 @@
                 <th class="d-none d-lg-table-cell">
                     <input type="submit" name="" value="Location" class="btn btn-toolbar" />
                 </th>
-                <th class="d-none d-xl-table-cell">
+                @* <th class="d-none d-xl-table-cell">
                     <input type="submit" name="" value="Document" class="btn btn-toolbar" />
-                </th>
-                <th class="d-none d-xl-table-cell"></th>
+                </th> *@
+                @* <th class="d-none d-xl-table-cell"></th> *@
             </tr>
         </thead>
         <tbody>
@@ -156,7 +156,7 @@
                             }
                         }
                     </td>
-                    <td class="d-none d-xl-table-cell">
+                    @*  <td class="d-none d-xl-table-cell"> 
                         @{
                             int fileCount = item.EmployeeDocuments.Count;
                             if (fileCount > 0)
@@ -184,7 +184,7 @@
                                 }
                             }
                         }
-                    </td>
+                    </td> *@
                     @* <td class="d-none d-xl-table-cell">
                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                         <a asp-action="Details" asp-route-id="@item.Id">Details</a> |

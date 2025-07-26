@@ -12,16 +12,16 @@ using mvc.ViewModel;
 namespace mvc.Controllers;
 
 [Authorize]
-public class EmployeeController : ReturnUrlController
+public class DirectoryController : ReturnUrlController
 {
     private readonly DirectoryContext _context;
 
-    public EmployeeController(DirectoryContext context)
+    public DirectoryController(DirectoryContext context)
     {
         _context = context;
     }
 
-    // GET: Employee
+
     [AllowAnonymous]
     public async Task<IActionResult> Index(string? searchString,
                                         int? JobTitleId, int? DepartmentId, int? ManagerId,
