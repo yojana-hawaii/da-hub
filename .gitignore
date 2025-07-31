@@ -361,6 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/src/Infrastructure/SqlQuery/directory.sql
-/src/Infrastructure/SqlQuery/query.sql
+
+# da-hub ignore
 /ui/mvc/appsettings.json
+/src/Infrastructure/DaHub-Sql

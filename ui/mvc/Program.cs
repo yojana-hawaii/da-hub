@@ -6,8 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<DirectoryContext>(
     options => options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DaHubProd") //production
-        //builder.Configuration.GetConnectionString("DaHubDev") //development
+        //production - use prod database directly. Dont want to accidentally make development changes
+        builder.Configuration.GetConnectionString("DaHubDev") //development
         )
     );
 
