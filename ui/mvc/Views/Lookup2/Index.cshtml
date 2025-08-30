@@ -1,0 +1,40 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>Alternnate Lookup Values</h2>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-6 col-md-4">
+            <h4 id="Department">Department</h4>
+            @Html.DropDownList("DepartmentDropdown", null, htmlAttributes: new { @size = 6, @class="form-control" })
+            <div>
+                <a asp-controller="Department" asp-action="Create">Create</a>
+                <a asp-controller="Department" asp-action="Edit" class="linkClick">Edit</a>
+                <a asp-controller="Department" asp-action="Delete" class="linkClick">Delete</a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4">
+            <h4 id="Department">Job Title</h4>
+            @Html.DropDownList("JobTitleDropdown", null, htmlAttributes: new { @size = 6, @class="form-control" })
+            <div>
+                <a asp-controller="JobTitle" asp-action="Create">Create</a>
+                <a asp-controller="JobTitle" asp-action="Edit" class="linkClick">Edit</a>
+                <a asp-controller="JobTitle" asp-action="Delete" class="linkClick">Delete</a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4">
+            <h4 id="Department">Location</h4>
+            @Html.DropDownList("LocationDropdown", null, htmlAttributes: new { @size = 6, @class = "form-control" })
+            <div>
+                <a asp-controller="Location" asp-action="Create">Create</a>
+                <a asp-controller="Location" asp-action="Edit" class="linkClick">Edit</a>
+                <a asp-controller="Location" asp-action="Delete" class="linkClick">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
