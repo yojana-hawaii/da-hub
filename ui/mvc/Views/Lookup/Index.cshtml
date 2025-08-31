@@ -1,0 +1,38 @@
+﻿<h2> Lookup Values</h2>
+
+<div>
+    <!--Nav Tabs-->
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button class="nav-link active" id="Department-Tab" data-bs-toggle="tab" data-bs-target="#DepartmentPanel" type="button" role="tab" aria-controls="DepartmentPanel" aria-selected="true">Department</button>
+            <button class="nav-link" id="Location-Tab" data-bs-toggle="tab" data-bs-target="#LocationPanel" type="button" role="tab" aria-controls="LocationPanel" aria-selected="false">Location</button>
+            <button class="nav-link" id="JobTitle-Tab" data-bs-toggle="tab" data-bs-target="#JobTitlePanel" type="button" role="tab" aria-controls="JobTitlePanel" aria-selected="false">Job Title</button>
+        </div>
+    </nav>
+
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="DepartmentPanel" role="tabpanel" aria-labelledby="DepartmentTab"><br />1</div>
+        <div class="tab-pane fade" id="LocationPanel" role="tabpanel" aria-labelledby="LocationTab"><br />2</div>
+        <div class="tab-pane fade" id="JobTitlePanel" role="tabpanel" aria-labelledby="JObTitleTab"><br />3</div>
+    </div>
+
+</div>
+<br />
+<br />
+
+@section Scripts {
+    <script src="~/js/highjackClickToGetId.js"></script>
+    <script src="~/js/getPartialViewOfSelectedTab.js"></script>
+
+    <!-- trigger click event on whichever tab is selected after 10 milisecond. 
+        Not sure how to pass viewData to different js file. 
+        Another option would be to manipulate DOM to get id of nav-tab
+    -->
+    <script type="text/javascript">
+    $(function () {
+        setTimeout(function () {
+            $("#@ViewData["Tab"]").trigger('click');
+        }, 10);
+    })
+    </script>
+}
