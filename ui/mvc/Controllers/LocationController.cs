@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace mvc.Controllers;
 
-[Authorize]
-public class LocationController : ReturnUrlController
+//[Authorize]
+public class LocationController : CustomLookupsController
 {
     private readonly DirectoryContext _context;
 
@@ -17,32 +17,12 @@ public class LocationController : ReturnUrlController
         _context = context;
     }
 
-    // GET: Location
     [AllowAnonymous]
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        return View(await _context.Locations.AsNoTracking().OrderBy(l => l.LocationName).ThenBy(s => s.SubLocation).ToListAsync());
+        // ReturnToAction(string ActionName, string ControllerName, string Fragment)
+        return RedirectToAction("Index", "Lookup", new { Tab = ViewData["QueryStringValueOrNavTabName"]?.ToString() });
     }
-
-    // GET: Location/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var location = await _context.Locations
-            .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (location == null)
-        {
-            return NotFound();
-        }
-
-        return View(location);
-    }
-
 
 
     // GET: Location/Create
@@ -149,7 +129,8 @@ public class LocationController : ReturnUrlController
             if (ModelState.IsValid)
             {
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // ReturnToAction(string ActionName, string ControllerName, string Fragment)
+                return RedirectToAction("Index", "Lookup", new {Tab = ViewData["QueryStringValueOrNavTabName"]?.ToString() });
             }
         }
         catch (DbUpdateConcurrencyException ex)

@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace mvc.Controllers;
 
-[Authorize]
-public class JobTitleController : ReturnUrlController
+//[Authorize]
+public class JobTitleController : CustomLookupsController
 {
     private readonly DirectoryContext _context;
 
@@ -17,30 +17,11 @@ public class JobTitleController : ReturnUrlController
         _context = context;
     }
 
-    // GET: JobTitle
     [AllowAnonymous]
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        return View(await _context.JobTitles.AsNoTracking().ToListAsync());
-    }
-
-    // GET: JobTitle/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var jobTitle = await _context.JobTitles
-            .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (jobTitle == null)
-        {
-            return NotFound();
-        }
-
-        return View(jobTitle);
+        // ReturnToAction(string ActionName, string ControllerName, string Fragment)
+        return RedirectToAction("Index", "Lookup", new { Tab = ViewData["QueryStringValueOrNavTabName"]?.ToString() });
     }
 
     // GET: JobTitle/Create
@@ -62,7 +43,8 @@ public class JobTitleController : ReturnUrlController
             {
                 _context.Add(jobTitle);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // ReturnToAction(string ActionName, string ControllerName, string Fragment)
+                return RedirectToAction("Index", "Lookup", new { Tab = ViewData["QueryStringValueOrNavTabName"]?.ToString() });
             }
 
         }
@@ -115,7 +97,8 @@ public class JobTitleController : ReturnUrlController
             try
             {
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // ReturnToAction(string ActionName, string ControllerName, string Fragment)
+                return RedirectToAction("Index", "Lookup", new { Tab = ViewData["QueryStringValueOrNavTabName"]?.ToString() });
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -178,7 +161,8 @@ public class JobTitleController : ReturnUrlController
         }
 
         await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
+        // ReturnToAction(string ActionName, string ControllerName, string Fragment)
+        return RedirectToAction("Index", "Lookup", new { Tab = ViewData["QueryStringValueOrNavTabName"]?.ToString() });
 
         }
         catch (DbUpdateException dex)
