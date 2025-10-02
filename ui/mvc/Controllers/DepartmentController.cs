@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace mvc.Controllers;
 
-[Authorize]
-public class DepartmentController : ReturnUrlController
+//[Authorize]
+public class DepartmentController : CustomLookupsController
 {
     private readonly DirectoryContext _context;
 
@@ -17,30 +17,11 @@ public class DepartmentController : ReturnUrlController
         _context = context;
     }
 
-    // GET: Department
     [AllowAnonymous]
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        return View(await _context.Departments.AsNoTracking().ToListAsync());
-    }
-
-    // GET: Department/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var department = await _context.Departments
-            .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (department == null)
-        {
-            return NotFound();
-        }
-
-        return View(department);
+        // ReturnToAction(string ActionName, string ControllerName, string Fragment)
+        return RedirectToAction("Index", "Lookup", new { Tab = ViewData["QueryStringValueOrNavTabName"]?.ToString() });
     }
 
     // GET: Department/Create
@@ -62,7 +43,9 @@ public class DepartmentController : ReturnUrlController
             {
                 _context.Add(department);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // ReturnToAction(string ActionName, string ControllerName, string Fragment)
+                return RedirectToAction("Index", "Lookup", new { Tab = ViewData["QueryStringValueOrNavTabName"]?.ToString() });
+
             }
         }
         catch (DbUpdateException dex)
@@ -74,7 +57,7 @@ public class DepartmentController : ReturnUrlController
             }
             else
             {
-                ModelState.AddModelError("", "Unable to save. Some problem I did not thing about.");
+                ModelState.AddModelError("", err);
             }
         }
         return View(department);
@@ -115,7 +98,8 @@ public class DepartmentController : ReturnUrlController
             {
                 _context.Update(deptToUpdate);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // ReturnToAction(string ActionName, string ControllerName, string Fragment)
+                return RedirectToAction("Index", "Lookup", new { Tab = ViewData["QueryStringValueOrNavTabName"]?.ToString() });
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -177,7 +161,8 @@ public class DepartmentController : ReturnUrlController
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            // ReturnToAction(string ActionName, string ControllerName, string Fragment)
+            return RedirectToAction("Index", "Lookup", new { Tab = ViewData["QueryStringValueOrNavTabName"]?.ToString() });
         }
         catch (DbUpdateException dex)
         {
