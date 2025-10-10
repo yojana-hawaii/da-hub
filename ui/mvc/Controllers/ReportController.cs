@@ -1,9 +1,11 @@
-﻿using Infrastructure.dbcontext;
+﻿using Domain.directoryViewModel;
+using Infrastructure.dbcontext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using mvc.CustomController;
 using mvc.ViewModel;
+using mvc.Utilities;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System.Drawing;
@@ -169,6 +171,19 @@ namespace mvc.Controllers
                 })
                 .OrderBy( d=> d.DepartmentName);
             return View(query.AsNoTracking().ToList());
+        public async Task<IActionResult> ManagerSummaryView(int? page, int? pageSizeId)
+        {
+            var query = _context.ManagerSummaries
+                .OrderBy(a => a.LastName)
+                .ThenBy(mngr => mngr.FirstName)
+                .AsNoTracking();
+
+            int pageSize = PageSizeHelper.SetPageSize(HttpContext, pageSizeId, "ManagerSummaryView");
+            ViewData["pageSizeId"] = PageSizeHelper.PageSizeList(pageSize);
+            var pagedData = await PaginatedList<ManagerSummaryVM>
+                .CreateAsync(query.AsNoTracking(), page ?? 1, pageSize);
+
+            return View(query);
         }
     }
 }
