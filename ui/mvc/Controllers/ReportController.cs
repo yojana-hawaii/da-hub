@@ -169,8 +169,9 @@ namespace mvc.Controllers
                     DepartmentName = grp.Key.DepartmentName == null ? "No Department" : grp.Key.DepartmentName,
                     EmployeeCount = grp.Count()
                 })
-                .OrderBy( d=> d.DepartmentName);
+                .OrderBy(d => d.DepartmentName);
             return View(query.AsNoTracking().ToList());
+        }
         public async Task<IActionResult> ManagerSummaryView(int? page, int? pageSizeId)
         {
             var query = _context.ManagerSummaries
