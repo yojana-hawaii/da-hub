@@ -44,6 +44,7 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     DirectoryInitializer.Initialize(serviceProvider: services, DeleteDatabase: false, UseMigrations: true, SeedSampleData: true);
+    ExtraDirectoryMigration.CreateViewWithRawSqlScript(serviceProvider: services);
 }
 
 app.Run();

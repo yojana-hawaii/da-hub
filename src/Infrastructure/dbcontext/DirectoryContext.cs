@@ -1,4 +1,5 @@
 ﻿using Domain.directory;
+using Domain.directoryViewModel;
 using Domain.extension;
 using Infrastructure.FluentApi.directory;
 using Microsoft.AspNetCore.Http;
@@ -46,6 +47,11 @@ public class DirectoryContext : DbContext
     public DbSet<EmployeePhoto> EmployeePhotos { get; set; }
     public DbSet<EmployeeThumbnail> EmployeeThumbnails { get; set; }
 
+    // create data base view
+    public DbSet<ManagerSummaryVM> ManagerSummaries { get; set; }
+
+    #endregion
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //apply all fluent api configuration to entity using reflection
@@ -78,6 +84,11 @@ public class DirectoryContext : DbContext
 
         #endregion
 
+        //manual mapping view
+        modelBuilder
+            .Entity<ManagerSummaryVM>()
+            .ToView(nameof(ManagerSummaries));
+        modelBuilder.ApplyConfiguration(new ManagerSummaryVMConfiguration());
 
         modelBuilder.HasDefaultSchema("dbo");
     }
