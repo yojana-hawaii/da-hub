@@ -1,8 +1,8 @@
 ﻿using Domain.directory;
 using Domain.extension;
+using Infrastructure.FluentApi.directory;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 
 namespace Infrastructure.dbcontext;
 
@@ -30,7 +30,7 @@ public class DirectoryContext : DbContext
         LoggedInUser = "seed-data-base-constructor";
     }
 
-
+    #region DbSet Table and View 
     public DbSet<Employee> Employees { get; set; }
     public DbSet<JobTitle> JobTitles { get; set; }
     public DbSet<Department> Departments { get; set; }
@@ -49,7 +49,37 @@ public class DirectoryContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //apply all fluent api configuration to entity using reflection
-        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        //modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        #region Manual Mapping Table Configuration
+        modelBuilder.Entity<Employee>();
+        modelBuilder.Entity<JobTitle>();
+        modelBuilder.Entity<Department>();
+        modelBuilder.Entity<Location>();
+        modelBuilder.Entity<Fax>();
+        modelBuilder.Entity<EmployeeLocation>();
+        modelBuilder.Entity<UploadedFile>();
+        modelBuilder.Entity<EmployeeDocument>();
+        modelBuilder.Entity<DepartmentDocument>();
+        modelBuilder.Entity<EmployeePhoto>();
+        modelBuilder.Entity<EmployeeThumbnail>();
+
+        modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
+        modelBuilder.ApplyConfiguration(new JobTitleConfiguration());
+        modelBuilder.ApplyConfiguration(new DepartmentConfiguration());
+        modelBuilder.ApplyConfiguration(new LocationConfiguration());
+        modelBuilder.ApplyConfiguration(new FaxConfiguration());
+        modelBuilder.ApplyConfiguration(new EmployeeLocationConfiguration());
+        modelBuilder.ApplyConfiguration(new UploadedFileConfiguration());
+        modelBuilder.ApplyConfiguration(new EmployeeDocumentConfiguration());
+        modelBuilder.ApplyConfiguration(new DepartmentDocumentConfiguration());
+        modelBuilder.ApplyConfiguration(new EmployeePhotoConfiguration());
+        modelBuilder.ApplyConfiguration(new EmployeeThumbnailConfiguration());
+
+        #endregion
+
+
+        modelBuilder.HasDefaultSchema("dbo");
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
