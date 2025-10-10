@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using mvc.CustomController;
+using mvc.ViewModel;
 using mvc.Utilities;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -157,6 +158,19 @@ namespace mvc.Controllers
             return NotFound();
         }
 
+        public IActionResult DepartmentSummaryLinq()
+        {
+            var query = _context.Employees
+                .Include(e => e.Department)
+                .GroupBy(ed => new { ed.DepartmentId, ed.Department.DepartmentName })
+                .Select(grp => new DepartmentSummaryVM
+                {
+                    Id = (int)(grp.Key.DepartmentId == null ? 0 : grp.Key.DepartmentId),
+                    DepartmentName = grp.Key.DepartmentName == null ? "No Department" : grp.Key.DepartmentName,
+                    EmployeeCount = grp.Count()
+                })
+                .OrderBy( d=> d.DepartmentName);
+            return View(query.AsNoTracking().ToList());
         public async Task<IActionResult> ManagerSummaryView(int? page, int? pageSizeId)
         {
             var query = _context.ManagerSummaries
