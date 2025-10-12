@@ -184,7 +184,7 @@ namespace mvc.Controllers
             var pagedData = await PaginatedList<ManagerSummaryVM>
                 .CreateAsync(query.AsNoTracking(), page ?? 1, pageSize);
 
-            return View(query);
+            return View(pagedData);
         }
     }
 }

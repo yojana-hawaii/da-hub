@@ -1,45 +1,44 @@
 ﻿@model IEnumerable<Domain.directoryViewModel.ManagerSummaryVM>
 
-@{
-    ViewData["Title"] = "ManagerSummaryView";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
+<partial name="_AddHeading" />
 
-<h1>ManagerSummaryView</h1>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.FullName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LatestHireDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.OldestHireDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NumberOfStaff)
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FullName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LatestHireDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.OldestHireDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NumberOfStaff)
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<form asp-controller="Report" asp-action="ManagerSummaryView" method="get">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.FullName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.LatestHireDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.OldestHireDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.NumberOfStaff)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FullName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.LatestHireDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.OldestHireDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.NumberOfStaff)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <partial name="_PagingNavBar" />
+</form>
