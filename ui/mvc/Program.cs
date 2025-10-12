@@ -1,5 +1,6 @@
 using Infrastructure.dbcontext;
 using Microsoft.EntityFrameworkCore;
+using mvc.Areas.Identity.Data;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,17 @@ builder.Services.AddDbContext<DirectoryContext>(
         builder.Configuration.GetConnectionString("DaHubDev") //development
         )
     );
+
+builder.Services.AddDbContext<IdentityDbContext>(
+    options => options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DaHubDevIdentity") //development
+        )
+    );
+
+
+builder.Services.AddDefaultIdentity<DaHubUser>(options =>
+    options.SignIn.RequireConfirmedAccount = true
+    ).AddEntityFrameworkStores<IdentityDbContext>();
 
 
 // Add services to the container.
@@ -46,5 +58,6 @@ using (var scope = app.Services.CreateScope())
     DirectoryInitializer.Initialize(serviceProvider: services, DeleteDatabase: false, UseMigrations: true, SeedSampleData: true);
     ExtraDirectoryMigration.CreateViewWithRawSqlScript(serviceProvider: services);
 }
+app.MapRazorPages();
 
 app.Run();
