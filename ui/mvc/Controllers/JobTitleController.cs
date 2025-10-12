@@ -4,6 +4,7 @@ using Domain.directory;
 using Infrastructure.dbcontext;
 using mvc.CustomController;
 using Microsoft.AspNetCore.Authorization;
+using OfficeOpenXml;
 
 namespace mvc.Controllers;
 
@@ -179,6 +180,37 @@ public class JobTitleController : CustomLookupsController
         return View(jobTitle);
     }
 
+    [HttpPost]
+    public async Task<IActionResult> InsertFromExcel(IFormFile theExcel)
+    {
+        // no error handling and no duplicate check
+        // try catch
+        // how many records incoming, how many success import, identify reason for failure > show result in view
+        ExcelPackage excel;
+        using (var memoryStream = new MemoryStream())
+        {
+            await theExcel.CopyToAsync(memoryStream);
+            excel = new ExcelPackage(memoryStream);
+        }
+        var worksheet = excel.Workbook.Worksheets[0];
+        var start = worksheet.Dimension.Start;
+        var end = worksheet.Dimension.End;
+
+        List<JobTitle> jobTitles = new List<JobTitle>();
+
+        for(int row = start.Row; row < end.Row; row++)
+        {
+            JobTitle jobTitle = new JobTitle
+            {
+                JobTitleName = worksheet.Cells[row, 1].Text
+            };
+            jobTitles.Add(jobTitle);
+        }
+        _context.JobTitles.AddRange(jobTitles);
+        _context.SaveChanges();
+
+        return Redirect(ViewData["returnUrl"].ToString());
+    }
     private bool JobTitleExists(int id)
     {
         return _context.JobTitles.Any(e => e.Id == id);

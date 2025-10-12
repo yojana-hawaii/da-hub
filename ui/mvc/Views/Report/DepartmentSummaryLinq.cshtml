@@ -1,0 +1,28 @@
+﻿@model IEnumerable<mvc.ViewModel.DepartmentSummaryVM>
+
+<partial name="_AddHeading" />
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.DepartmentName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EmployeeCount)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.DepartmentName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EmployeeCount)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
