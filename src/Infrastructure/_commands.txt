@@ -5,3 +5,6 @@ Update-Database -StartupProject ui\mvc -Context DirectoryContext -Project src\In
 Remove-Migration -StartupProject ui\mvc -Project src\Infrastructure -Context DirectoryContext
 
 script-migration
+
+Add-Migration  -StartupProject ui\mvc -Project ui\mvc -Context IdentityDbContext -OutputDir ui\mvc\Areas\IdentityMigration IdentityEntityMigration
+Update-Database -StartupProject ui\mvc -Context IdentityDbContext -Project ui\mvc
